@@ -1,0 +1,2735 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heeal · Growth Strategy 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-2: #12121a;
+    --bg-3: #1a1a24;
+    --ink: #f4f4f6;
+    --muted: #8a8a99;
+    --dim: #4a4a55;
+    --line: rgba(255,255,255,0.08);
+    --line-2: rgba(255,255,255,0.04);
+    --neon: #b8ff3a;
+    --neon-2: #00e5ff;
+    --magenta: #ff4dd2;
+    --gold: #ffc857;
+    --red: #ff3d6e;
+    --bronze: #cd7f32;
+    --silver: #c0c0c8;
+    --display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: var(--display); }
+  body {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(184,255,58,0.06), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(0,229,255,0.05), transparent 60%),
+      var(--bg);
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    pointer-events: none; z-index: 100; opacity: 0.5; mix-blend-mode: overlay;
+  }
+
+  .deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 60px 80px;
+    opacity: 0;
+    transform: translateY(24px);
+    pointer-events: none;
+    transition: opacity 600ms cubic-bezier(.2,.8,.2,1), transform 600ms cubic-bezier(.2,.8,.2,1);
+    overflow: hidden;
+  }
+  .slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+  /* HUD top */
+  .hud {
+    position: fixed; z-index: 50; top: 22px; left: 32px;
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
+  }
+  .hud .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--neon); box-shadow: 0 0 10px var(--neon); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .hud .sep { color: var(--dim); }
+  .progress { position: fixed; z-index: 50; top: 22px; right: 32px; display: flex; align-items: center; gap: 12px; }
+  .progress-bar { display: flex; gap: 2px; align-items: center; }
+  .progress-bar .seg { width: 8px; height: 2px; background: var(--dim); transition: background 300ms ease; }
+  .progress-bar .seg.done { background: var(--ink); }
+  .progress-bar .seg.current { background: var(--neon); box-shadow: 0 0 6px var(--neon); }
+  .slide-counter { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--muted); white-space: nowrap; }
+  .slide-counter .cur { color: var(--neon); font-weight: 700; }
+  .nav-help { position: fixed; z-index: 50; bottom: 18px; right: 32px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: var(--dim); text-transform: uppercase; }
+  .nav-help kbd { display: inline-block; padding: 2px 6px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg-2); color: var(--muted); font-family: var(--mono); margin: 0 2px; }
+  .footer-tag { position: fixed; z-index: 50; bottom: 18px; left: 32px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: var(--dim); text-transform: uppercase; }
+
+  /* Click-to-reveal step system */
+  .step { opacity: 0; transform: translateY(14px); transition: opacity 0.5s cubic-bezier(.2,.8,.2,1), transform 0.5s cubic-bezier(.2,.8,.2,1); pointer-events: none; }
+  .step.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .step.fade-in { transform: none; }
+  .step.fade-in.visible { opacity: 1; }
+  .step.scale-in { transform: scale(0.92); }
+  .step.scale-in.visible { opacity: 1; transform: scale(1); }
+
+  /* Atoms */
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--neon); }
+  .eyebrow .sep { color: var(--dim); margin: 0 8px; }
+  .eyebrow.magenta { color: var(--magenta); }
+  .eyebrow.gold { color: var(--gold); }
+  h1 { font-family: var(--display); font-weight: 700; font-size: clamp(48px, 6vw, 96px); line-height: 0.95; letter-spacing: -0.03em; }
+  h2 { font-family: var(--display); font-weight: 700; font-size: clamp(36px, 4.4vw, 68px); line-height: 1.0; letter-spacing: -0.025em; }
+  h3 { font-family: var(--display); font-weight: 600; font-size: clamp(20px, 1.6vw, 28px); line-height: 1.2; letter-spacing: -0.01em; }
+  .lede {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(20px, 2vw, 32px); line-height: 1.4; color: var(--muted);
+    max-width: 1000px;
+  }
+
+  .slide-eyebrow {
+    position: absolute; top: 56px; left: 80px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--neon);
+  }
+  .slide-eyebrow .sep { color: var(--dim); margin: 0 8px; }
+
+  /* Phone frame reusable */
+  .phone-frame {
+    width: 280px; height: 580px;
+    background: #000;
+    border: 7px solid #1a1a24;
+    border-radius: 32px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+    overflow: hidden; position: relative;
+  }
+  .phone-frame.lg { width: 320px; height: 640px; border-radius: 36px; }
+  .phone-frame .notch { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 90px; height: 20px; background: #000; border-radius: 12px; z-index: 10; }
+  .phone-frame .screen { width: 100%; height: 100%; overflow: hidden; position: relative; }
+
+  /* ============================================================
+     SLIDE-SPECIFIC STYLES
+     ============================================================ */
+
+  /* S1 - PRESS START */
+  #s1 { flex-direction: column; gap: 40px; text-align: center; }
+  #s1 .game-tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.4em; color: var(--neon);
+  }
+  #s1 .title-wrap {
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(80px, 12vw, 180px); line-height: 0.85;
+    letter-spacing: -0.05em;
+  }
+  #s1 .title-wrap .ral {
+    background: linear-gradient(180deg, var(--neon), var(--neon-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  #s1 .subtitle-line { font-family: var(--serif); font-style: italic; font-size: clamp(20px, 2vw, 30px); color: var(--muted); }
+  #s1 .press-start {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.3em; color: var(--neon);
+    animation: blink 1.5s ease-in-out infinite;
+    margin-top: 8px;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+  #s1 .credits {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--dim);
+    margin-top: 16px;
+  }
+
+  /* S2 - DATO 1 */
+  #s2, #s3, #s4 { flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 20px; }
+  .big-stat-num {
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(180px, 22vw, 320px);
+    line-height: 0.85;
+    letter-spacing: -0.06em;
+  }
+  .big-stat-num.r { color: var(--red); }
+  .big-stat-num.g { color: var(--neon); }
+  .big-stat-num.gold { color: var(--gold); }
+  .big-stat-context {
+    font-family: var(--display); font-size: clamp(22px, 2.4vw, 36px);
+    color: var(--ink); max-width: 900px; line-height: 1.3;
+  }
+  .big-stat-context .x { color: var(--neon); }
+  .big-stat-context .r { color: var(--red); }
+  .stat-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .stat-eyebrow.r { color: var(--red); }
+
+  /* S5 - PREGUNTA */
+  #s5 { flex-direction: column; gap: 32px; text-align: center; align-items: center; justify-content: center; }
+  #s5 .question {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(44px, 5.5vw, 84px);
+    line-height: 1.1; max-width: 1200px;
+  }
+  #s5 .question .x { color: var(--neon); }
+  #s5 .answer {
+    font-family: var(--display); font-weight: 600;
+    font-size: clamp(20px, 2vw, 28px);
+    color: var(--muted); max-width: 900px; line-height: 1.5;
+  }
+  #s5 .answer strong { color: var(--ink); }
+
+  /* S6 — Heeal Mockup */
+  #s6 { flex-direction: column; align-items: center; justify-content: center; gap: 30px; text-align: center; }
+  #s6 .top-text { max-width: 900px; }
+  #s6 .top-text h2 .x { color: var(--neon); }
+  #s6 .top-text .lede-2 { font-family: var(--serif); font-style: italic; font-size: 24px; color: var(--muted); margin-top: 10px; }
+  #s6 .row { display: flex; gap: 60px; align-items: center; }
+
+  /* Heeal app screen — used in many slides */
+  .app-screen {
+    width: 100%; height: 100%;
+    background: linear-gradient(180deg, #1a0f2e 0%, #0a0a0f 100%);
+    padding: 36px 16px 16px;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative;
+  }
+  .app-screen .top-bar {
+    width: 100%; padding: 0 4px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .app-screen .top-bar .username { font-family: var(--mono); font-size: 9px; color: var(--neon); letter-spacing: 0.1em; }
+  .app-screen .top-bar .level-tag { font-family: var(--mono); font-size: 9px; color: var(--silver); letter-spacing: 0.1em; }
+  .app-screen .avatar-circle {
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, rgba(184,255,58,0.3), transparent 70%);
+    display: flex; align-items: center; justify-content: center;
+    margin: 6px 0;
+    transition: filter 1s ease, background 1s ease;
+  }
+  .app-screen .avatar-circle.deteriorated { filter: grayscale(0.6) brightness(0.7); background: radial-gradient(circle at 50% 40%, rgba(184,255,58,0.05), transparent 70%); }
+  .app-screen .avatar-circle.broken { filter: grayscale(1) brightness(0.45); background: rgba(255,61,110,0.05); }
+  .app-screen .avatar-svg { width: 100%; height: 100%; }
+  .app-screen .level-badge {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--silver); letter-spacing: 0.15em;
+    margin-top: 2px;
+  }
+  .app-screen .xp-line {
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    margin-top: 4px;
+  }
+  .app-screen .xp-bar {
+    width: 84%; height: 5px; background: var(--bg-3);
+    border-radius: 3px; overflow: hidden; margin: 8px 0 4px;
+  }
+  .app-screen .xp-bar .fill {
+    height: 100%; background: linear-gradient(90deg, var(--neon), var(--neon-2));
+    width: 73%; transition: width 1.5s ease-out;
+  }
+  .app-screen .stats-row { display: flex; gap: 6px; margin-top: 12px; width: 100%; padding: 0 6px; }
+  .app-screen .stat-mini { flex: 1; padding: 6px 4px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px; text-align: center; }
+  .app-screen .stat-mini .l { font-family: var(--mono); font-size: 7px; color: var(--muted); letter-spacing: 0.1em; }
+  .app-screen .stat-mini .v { font-family: var(--display); font-size: 14px; font-weight: 700; color: var(--neon); }
+  .app-screen .stat-mini.gold .v { color: var(--gold); }
+  .app-screen .duel-cta {
+    margin-top: auto;
+    width: 100%;
+    background: linear-gradient(90deg, var(--neon), var(--neon-2));
+    color: #000;
+    padding: 11px 0;
+    border-radius: 10px;
+    font-family: var(--display); font-weight: 700; font-size: 12px;
+    text-align: center;
+  }
+
+  /* S6 right side text */
+  #s6 .desc-side { text-align: left; max-width: 380px; }
+  #s6 .desc-side .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--neon); margin-bottom: 10px; }
+  #s6 .desc-side h3 { font-size: 26px; margin-bottom: 12px; }
+  #s6 .desc-side p { font-family: var(--display); font-size: 16px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+  #s6 .desc-side p strong { color: var(--ink); }
+
+  /* S7 - LOOP */
+  #s7 { flex-direction: column; gap: 50px; align-items: center; text-align: center; }
+  #s7 h2 { max-width: 1100px; }
+  #s7 h2 .x { color: var(--neon); }
+  #s7 .loop-flow {
+    display: flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: center;
+  }
+  #s7 .loop-step {
+    padding: 18px 24px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg-2);
+    min-width: 180px;
+    transition: all 400ms ease;
+  }
+  #s7 .loop-step.shown { border-color: var(--neon); background: rgba(184,255,58,0.05); }
+  #s7 .loop-step .ic { font-size: 32px; margin-bottom: 8px; }
+  #s7 .loop-step .name {
+    font-family: var(--display); font-weight: 700; font-size: 16px;
+  }
+  #s7 .loop-step .desc {
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    letter-spacing: 0.1em; margin-top: 4px;
+  }
+  #s7 .loop-arrow {
+    font-family: var(--mono); font-size: 24px; color: var(--neon);
+    opacity: 0.5;
+  }
+
+  /* S8 — TEAM ENTRA AL JUEGO */
+  #s8 { flex-direction: column; gap: 28px; align-items: center; text-align: center; }
+  #s8 .label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.3em; color: var(--magenta); }
+  #s8 h2 { max-width: 1100px; }
+  #s8 h2 .x { color: var(--magenta); font-family: var(--serif); font-style: italic; }
+  #s8 .obj-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    max-width: 1200px; width: 100%;
+  }
+  #s8 .obj-card {
+    padding: 20px;
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+    border-radius: 6px;
+  }
+  #s8 .obj-card .o-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+  #s8 .obj-card .o-from { font-family: var(--display); font-size: 24px; color: var(--dim); text-decoration: line-through; margin-top: 8px; }
+  #s8 .obj-card .o-arrow { color: var(--dim); font-family: var(--mono); font-size: 16px; }
+  #s8 .obj-card .o-to { font-family: var(--display); font-weight: 800; font-size: 36px; color: var(--neon); letter-spacing: -0.02em; }
+
+  /* S9 — Pregunta NSM */
+  #s9 { flex-direction: column; gap: 28px; align-items: center; text-align: center; }
+  #s9 h2 { max-width: 1100px; }
+  #s9 h2 .x { color: var(--neon); }
+  #s9 .examples {
+    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+    max-width: 900px;
+  }
+  #s9 .ex-pill {
+    padding: 10px 18px;
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    background: var(--bg-2);
+    font-family: var(--mono); font-size: 13px; color: var(--muted);
+  }
+  #s9 .ex-pill.x {
+    border-color: var(--red); color: var(--red); text-decoration: line-through;
+  }
+
+  /* S10 — NSM REVEAL */
+  #s10 { flex-direction: column; gap: 24px; align-items: center; justify-content: center; text-align: center; }
+  #s10 .nsm-tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--neon);
+  }
+  #s10 .nsm-name {
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(48px, 6vw, 88px);
+    line-height: 0.95; letter-spacing: -0.03em;
+    max-width: 1300px;
+  }
+  #s10 .nsm-acro {
+    font-family: var(--mono); font-size: 18px;
+    color: var(--muted); letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+  #s10 .nsm-def {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(22px, 2vw, 32px);
+    line-height: 1.4; color: var(--ink);
+    max-width: 1200px;
+    border-left: 3px solid var(--neon);
+    padding-left: 24px;
+    margin-top: 20px;
+  }
+  #s10 .nsm-def .x { color: var(--neon); }
+
+  /* S11 — GOI TREE */
+  #s11 { flex-direction: column; gap: 10px; align-items: center; padding: 36px 50px 40px; }
+  #s11 .goi-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--neon); }
+  #s11 .goi-title { font-family: var(--display); font-weight: 700; line-height: 1; letter-spacing: -0.02em; text-align: center; margin-top: 4px; }
+  #s11 .goi-tree { width: 100%; max-width: 1400px; display: flex; flex-direction: column; align-items: stretch; }
+  #s11 .goi-level { display: flex; justify-content: space-around; align-items: stretch; gap: 14px; }
+  #s11 .goi-level.lv1 { justify-content: center; }
+  #s11 .goi-level.lv2 { padding: 0 60px; }
+  #s11 .goi-level.lv3 { padding: 0 60px; }
+  #s11 .goi-node { border: 1px solid var(--line); background: var(--bg-2); border-radius: 10px; padding: 10px 14px; }
+  #s11 .goi-node.nsm { border: 2px solid var(--neon); background: linear-gradient(180deg, rgba(184,255,58,0.1), rgba(184,255,58,0.04)); padding: 12px 28px; text-align: center; box-shadow: 0 0 24px rgba(184,255,58,0.18); min-width: 320px; }
+  #s11 .goi-node.nsm .goi-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.25em; color: var(--neon); margin-bottom: 4px; }
+  #s11 .goi-node.nsm .goi-name { font-family: var(--display); font-weight: 800; font-size: 24px; color: var(--ink); letter-spacing: -0.02em; line-height: 1; }
+  #s11 .goi-node.nsm .goi-desc { font-family: var(--display); font-size: 11px; color: var(--muted); margin-top: 4px; }
+  #s11 .goi-node.area { flex: 1; text-align: center; padding: 10px 12px; }
+  #s11 .goi-node.area.activacion { border-color: rgba(0,229,255,0.4); background: linear-gradient(180deg, rgba(0,229,255,0.06), var(--bg-2)); }
+  #s11 .goi-node.area.retencion { border-color: rgba(255,200,87,0.4); background: linear-gradient(180deg, rgba(255,200,87,0.06), var(--bg-2)); }
+  #s11 .goi-node.area.monetizacion { border-color: rgba(255,77,210,0.4); background: linear-gradient(180deg, rgba(255,77,210,0.06), var(--bg-2)); }
+  #s11 .goi-node.area .goi-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; margin-bottom: 4px; }
+  #s11 .goi-node.area.activacion .goi-tag { color: var(--neon-2); }
+  #s11 .goi-node.area.retencion .goi-tag { color: var(--gold); }
+  #s11 .goi-node.area.monetizacion .goi-tag { color: var(--magenta); }
+  #s11 .goi-node.area .goi-target { font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--muted); letter-spacing: -0.01em; }
+  #s11 .goi-node.area .goi-target .x { color: var(--ink); font-weight: 800; }
+  #s11 .goi-node.area .goi-metrics { font-family: var(--mono); font-size: 8px; color: var(--dim); letter-spacing: 0.05em; margin-top: 4px; }
+  #s11 .goi-node.opportunity { flex: 1; padding: 9px 11px; background: var(--bg-2); }
+  #s11 .goi-node.opportunity .goi-otype { font-family: var(--mono); font-size: 8px; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 3px; }
+  #s11 .goi-node.opportunity .goi-otitle { font-family: var(--display); font-weight: 700; font-size: 12px; color: var(--ink); line-height: 1.2; }
+  #s11 .goi-node.opportunity .goi-onote { font-family: var(--display); font-size: 10px; color: var(--muted); margin-top: 2px; line-height: 1.3; }
+  #s11 .goi-cluster { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 0 8px; }
+  #s11 .goi-idea { background: rgba(255,255,255,0.03); border: 1px solid var(--line-2); border-radius: 5px; padding: 4px 8px; font-family: var(--mono); font-size: 9px; color: var(--ink); letter-spacing: 0.02em; display: flex; align-items: center; gap: 6px; }
+  #s11 .goi-idea .i-icon { font-size: 12px; flex: 0 0 14px; }
+  #s11 .goi-connector { width: 100%; height: 24px; padding: 0 60px; }
+  #s11 .goi-connector.lv12 { height: 28px; }
+  #s11 .goi-connector svg { width: 100%; height: 100%; }
+  #s11 .goi-connector .line { fill: none; stroke: var(--neon); stroke-width: 1.5; opacity: 0.4; }
+  #s11 .goi-input-card { flex: 1; padding: 8px 12px; border: 1px solid var(--line-2); border-radius: 6px; background: rgba(255,255,255,0.015); }
+  #s11 .goi-input-title { font-family: var(--mono); font-size: 8px; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 4px; }
+  #s11 .goi-input-item { font-family: var(--display); font-size: 10px; color: var(--dim); line-height: 1.6; }
+
+  /* S11 — INPUT METRICS (old styles kept for backward compat) */
+
+  /* S12 — DOS USUARIOS + DECISIÓN (fusión) */
+  #s12 { flex-direction: column; gap: 20px; align-items: center; text-align: center; }
+  #s12 h2 { max-width: 1000px; }
+  #s12 h2 .x { color: var(--neon); }
+  #s12 .decision-block {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(22px, 2.4vw, 36px); line-height: 1.25;
+    max-width: 1000px; text-align: center;
+    border-top: 1px solid rgba(255,200,87,0.2);
+    padding-top: 20px; margin-top: 4px;
+  }
+  #s12 .decision-block .x { color: var(--gold); }
+  #s12 .decision-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+
+  /* S13 — Segments */
+  #s13 { flex-direction: column; gap: 24px; align-items: center; }
+  #s13 h2 { text-align: center; max-width: 1000px; }
+  #s12 .seg-grid, #s13 .seg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1300px; width: 100%; }
+  #s12 .seg-card, #s13 .seg-card {
+    border: 1px solid var(--line); padding: 28px;
+    border-radius: 6px; background: var(--bg-2); position: relative;
+  }
+  #s12 .seg-card.win, #s13 .seg-card.win { border-color: rgba(184,255,58,0.3); background: linear-gradient(180deg, rgba(184,255,58,0.04), var(--bg-2)); }
+  #s12 .seg-card.lose, #s13 .seg-card.lose { border-color: rgba(255,61,110,0.2); opacity: 0.85; }
+  #s12 .seg-card .badge, #s13 .seg-card .badge { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+  #s12 .win .badge, #s13 .win .badge { color: var(--neon); }
+  #s12 .lose .badge, #s13 .lose .badge { color: var(--red); }
+  #s12 .seg-card h3, #s13 .seg-card h3 { font-size: 30px; margin-bottom: 4px; }
+  #s12 .seg-card .role, #s13 .seg-card .role { font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 17px; margin-bottom: 16px; }
+  #s12 .seg-card .who-emoji, #s13 .seg-card .who-emoji { font-size: 36px; margin-bottom: 8px; display: block; }
+  #s12 .seg-card .summary, #s13 .seg-card .summary { font-family: var(--display); font-size: 15px; color: var(--muted); line-height: 1.6; }
+  #s12 .seg-card .summary strong, #s13 .seg-card .summary strong { color: var(--ink); }
+
+  /* S14 — Decision */
+  #s14 { flex-direction: column; gap: 32px; align-items: center; text-align: center; justify-content: center; }
+  #s14 .quote {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(38px, 4.5vw, 64px); line-height: 1.2;
+    max-width: 1200px;
+  }
+  #s14 .quote .x { color: var(--neon); }
+  #s14 .author { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--muted); }
+
+  /* S15 — Three palancas */
+  #s15 { flex-direction: column; gap: 28px; align-items: center; text-align: center; }
+  #s15 h2 { text-align: center; max-width: 1100px; }
+  #s15 .pal-row { display: flex; gap: 0; max-width: 1300px; width: 100%; }
+  #s15 .pal {
+    flex: 1; padding: 26px; border: 1px solid var(--line);
+    background: var(--bg-2); position: relative;
+  }
+  #s15 .pal:not(:last-child) { border-right: none; }
+  #s15 .pal .num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  #s15 .pal .num .n { color: var(--neon); }
+  #s15 .pal h3 { font-size: 28px; margin-bottom: 8px; }
+  #s15 .pal .verb { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--muted); margin-bottom: 16px; }
+  #s15 .pal .target {
+    font-family: var(--mono); font-size: 13px; padding: 10px 14px;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 4px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  #s15 .pal .target .from { color: var(--muted); }
+  #s15 .pal .target .arrow { color: var(--dim); margin: 0 8px; }
+  #s15 .pal .target .to { color: var(--neon); font-weight: 700; }
+  #s15 .principle {
+    font-family: var(--serif); font-style: italic;
+    font-size: 22px; color: var(--muted); max-width: 1100px; text-align: center;
+  }
+  #s15 .principle .x { color: var(--neon); }
+
+  /* S16 — funnel problem */
+  #s16 { flex-direction: column; gap: 24px; align-items: center; text-align: center; justify-content: center; }
+  #s16 h2 { max-width: 1100px; }
+  #s16 h2 .x { color: var(--red); }
+  #s16 .funnel {
+    width: 600px;
+    display: flex; flex-direction: column; gap: 0;
+  }
+  #s16 .f-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line-2);
+  }
+  #s16 .f-row .name { font-family: var(--display); font-size: 15px; flex: 1; text-align: left; }
+  #s16 .f-row .val { font-family: var(--mono); font-size: 14px; color: var(--ink); font-weight: 700; min-width: 60px; text-align: right; }
+  #s16 .f-row.problem .val { color: var(--red); }
+  #s16 .f-bar { width: 240px; height: 8px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  #s16 .f-bar .fill { height: 100%; background: linear-gradient(90deg, var(--neon), var(--neon-2)); transform-origin: left; transform: scaleX(0); }
+  #s16 .f-bar.problem .fill { background: linear-gradient(90deg, var(--red), var(--magenta)); }
+  /* Bar expands when parent step becomes visible */
+  .step.visible .f-bar .fill {
+    animation: barFill 0.8s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  @keyframes barFill { from { transform: scaleX(0); } to { transform: scaleX(var(--w, 1)); } }
+
+  #s16 .gym-analogy {
+    margin-top: 4px;
+    padding: 16px 28px;
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+    border-radius: 6px;
+    max-width: 600px;
+    text-align: left;
+  }
+  #s16 .gym-analogy .gym-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 8px; }
+  #s16 .gym-analogy .gym-text { font-family: var(--serif); font-style: italic; font-size: 18px; line-height: 1.5; }
+  #s16 .gym-analogy .gym-text .x { color: var(--neon); }
+  #s16 .gym-analogy .gym-punch { font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--gold); margin-top: 10px; }
+
+  /* S18 — Solucion: arquetipos animacion */
+  #s18 { flex-direction: column; gap: 24px; align-items: center; text-align: center; }
+  #s18 h2 { max-width: 1100px; }
+  #s18 h2 .x { color: var(--neon); }
+  #s18 .compare {
+    display: flex; gap: 60px; align-items: center; justify-content: center;
+  }
+  #s18 .before, #s18 .after {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  #s18 .vlabel { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 10px; border-radius: 3px; }
+  #s18 .before .vlabel { color: var(--red); border: 1px solid rgba(255,61,110,0.3); background: rgba(255,61,110,0.05); }
+  #s18 .after .vlabel { color: var(--neon); border: 1px solid var(--neon); background: rgba(184,255,58,0.05); }
+  #s18 .vs-label { font-family: var(--display); font-weight: 800; font-size: 36px; color: var(--magenta); align-self: center; }
+  #s18 .archetype-screen { padding: 28px 16px 16px; }
+  #s18 .archetype-step { font-family: var(--mono); font-size: 8px; letter-spacing: 0.2em; color: var(--neon); text-align: center; margin-bottom: 4px; }
+  #s18 .archetype-title { font-family: var(--display); font-weight: 700; font-size: 18px; text-align: center; line-height: 1.1; margin-bottom: 4px; }
+  #s18 .archetype-sub { font-family: var(--display); font-size: 10px; color: var(--muted); text-align: center; margin-bottom: 14px; padding: 0 12px; }
+  #s18 .arch-list { display: flex; flex-direction: column; gap: 8px; padding: 0 4px; }
+  #s18 .arch-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer; transition: all 300ms ease;
+  }
+  #s18 .arch-card.selected {
+    border-color: var(--neon);
+    background: rgba(184,255,58,0.08);
+    box-shadow: 0 0 14px rgba(184,255,58,0.2);
+  }
+  #s18 .arch-icon {
+    width: 38px; height: 38px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex: 0 0 38px;
+  }
+  #s18 .arch-icon.warrior { background: linear-gradient(135deg, #ff6b6b, #ff3d6e); }
+  #s18 .arch-icon.explorer { background: linear-gradient(135deg, #00e5ff, #0080ff); }
+  #s18 .arch-icon.balance { background: linear-gradient(135deg, #b8ff3a, #00e5ff); }
+  #s18 .arch-card .arch-info { flex: 1; min-width: 0; text-align: left; }
+  #s18 .arch-card .arch-name { font-family: var(--display); font-weight: 700; font-size: 12px; }
+  #s18 .arch-card .arch-desc { font-family: var(--mono); font-size: 8px; color: var(--muted); letter-spacing: 0.05em; }
+  #s18 .arch-card .arch-check {
+    width: 18px; height: 18px; border: 1px solid var(--dim); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 18px;
+    font-family: var(--mono); font-size: 10px;
+  }
+  #s18 .arch-card.selected .arch-check { border-color: var(--neon); background: var(--neon); color: #000; font-weight: 700; }
+  #s18 .arch-cta {
+    margin-top: auto; background: var(--neon); color: #000;
+    padding: 11px 0; border-radius: 10px;
+    font-family: var(--display); font-weight: 700; font-size: 12px;
+    text-align: center;
+    box-shadow: 0 0 22px rgba(184,255,58,0.35);
+  }
+
+  /* S18 wall of options (before) */
+  #s18 .wall-screen { padding: 28px 12px 12px; background: linear-gradient(180deg, #2a1010, #0a0a0f); }
+  #s18 .wall-step { font-family: var(--mono); font-size: 8px; letter-spacing: 0.2em; color: var(--red); text-align: center; margin-bottom: 4px; }
+  #s18 .wall-title { font-family: var(--display); font-weight: 700; font-size: 13px; text-align: center; margin-bottom: 4px; }
+  #s18 .wall-list {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;
+    max-height: 400px; overflow: hidden;
+    padding: 0 2px;
+  }
+  #s18 .wall-list .opt {
+    padding: 6px 4px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-family: var(--mono); font-size: 7px;
+    color: var(--muted); letter-spacing: 0.05em;
+    text-align: center;
+  }
+  #s18 .wall-cta { margin-top: 8px; padding: 8px; background: var(--bg-3); border-radius: 6px; font-family: var(--mono); font-size: 9px; color: var(--dim); text-align: center; }
+
+  /* S19 — calibracion mision */
+  #s19 { flex-direction: column; gap: 28px; align-items: center; text-align: center; }
+  #s19 h2 { max-width: 1100px; }
+  #s19 h2 .x { color: var(--neon); }
+  #s19 .principle {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em;
+    color: var(--neon-2);
+  }
+  #s19 .row { display: flex; gap: 50px; align-items: center; }
+  #s19 .calib-screen {
+    background:
+      radial-gradient(circle at 50% 30%, rgba(0,229,255,0.18), transparent 60%),
+      linear-gradient(180deg, #0a1a2a, #0a0a0f);
+    padding: 40px 18px 18px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  #s19 .calib-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--neon-2); }
+  #s19 .calib-title { font-family: var(--display); font-weight: 700; font-size: 22px; text-align: center; margin: 16px 0 8px; line-height: 1.1; }
+  #s19 .calib-sub { font-family: var(--display); font-size: 12px; color: var(--muted); text-align: center; padding: 0 10px; margin-bottom: 24px; }
+  #s19 .timer-circle {
+    width: 140px; height: 140px;
+    border: 4px solid var(--neon-2);
+    border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    margin: 8px 0 16px;
+    box-shadow: 0 0 24px rgba(0,229,255,0.3);
+    position: relative;
+  }
+  #s19 .timer-circle::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    border-top-color: var(--neon);
+    animation: spin 5s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #s19 .timer-num { font-family: var(--mono); font-size: 36px; color: var(--neon); font-weight: 700; }
+  #s19 .timer-label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.15em; }
+  #s19 .calib-task { font-family: var(--display); font-size: 13px; color: var(--ink); text-align: center; padding: 0 16px; }
+  #s19 .calib-cta {
+    margin-top: auto; background: var(--neon-2); color: #000;
+    padding: 12px 0; border-radius: 10px;
+    font-family: var(--display); font-weight: 700; font-size: 12px;
+    text-align: center;
+    width: 100%;
+  }
+  #s19 .reasoning {
+    text-align: left; max-width: 380px;
+  }
+  #s19 .reasoning h3 { font-size: 24px; margin-bottom: 10px; }
+  #s19 .reasoning p { font-family: var(--display); font-size: 15px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+  #s19 .reasoning p strong { color: var(--ink); }
+  #s19 .reasoning .src {
+    font-family: var(--mono); font-size: 10px; color: var(--neon-2);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px;
+  }
+
+  /* S20 — VICTORIA / Aha Moment */
+  #s20 { flex-direction: column; gap: 28px; align-items: center; text-align: center; }
+  #s20 h2 { max-width: 1100px; }
+  #s20 h2 .x { color: var(--gold); font-family: var(--serif); font-style: italic; }
+  #s20 .row { display: flex; gap: 40px; align-items: center; justify-content: center; }
+  #s20 .victory-screen {
+    background:
+      radial-gradient(circle at 50% 25%, rgba(255,200,87,0.3), transparent 60%),
+      linear-gradient(180deg, #2a1f0a, #0a0a0f);
+    padding: 40px 18px 18px;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative;
+  }
+  #s20 .victory-screen::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, var(--neon), transparent),
+      radial-gradient(2px 2px at 60% 20%, var(--gold), transparent),
+      radial-gradient(2px 2px at 80% 60%, var(--neon-2), transparent),
+      radial-gradient(2px 2px at 30% 80%, var(--magenta), transparent),
+      radial-gradient(1px 1px at 90% 35%, var(--gold), transparent),
+      radial-gradient(2px 2px at 10% 50%, var(--neon), transparent),
+      radial-gradient(1px 1px at 70% 90%, var(--magenta), transparent);
+    background-size: 200% 200%;
+    animation: confetti 3s linear infinite;
+    opacity: 0.7; pointer-events: none;
+  }
+  @keyframes confetti { 0% { background-position: 0% 0%; } 100% { background-position: 0% 100%; } }
+  #s20 .v-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.3em; color: var(--gold); margin-top: 8px; z-index: 2; }
+  #s20 .trophy-big {
+    font-size: 80px; margin: 12px 0 4px;
+    filter: drop-shadow(0 0 28px rgba(255,200,87,0.7));
+    animation: bounce 2s ease-in-out infinite;
+    z-index: 2;
+  }
+  @keyframes bounce { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.05); } }
+  #s20 .v-title { font-family: var(--display); font-weight: 800; font-size: 26px; text-align: center; line-height: 1; margin-bottom: 4px; z-index: 2; }
+  #s20 .v-rank { font-family: var(--mono); font-size: 11px; color: var(--gold); letter-spacing: 0.2em; margin-bottom: 14px; z-index: 2; }
+  #s20 .v-rank .from { color: var(--dim); text-decoration: line-through; }
+  #s20 .v-rank .to { color: var(--gold); font-weight: 700; }
+  #s20 .v-xp {
+    background: var(--bg-2); border: 1px solid var(--neon);
+    padding: 8px 14px; border-radius: 6px;
+    font-family: var(--mono); font-size: 11px; color: var(--neon);
+    margin-bottom: 12px; z-index: 2;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  #s20 .v-message {
+    font-family: var(--display); font-size: 12px; color: var(--muted);
+    text-align: center; line-height: 1.4; padding: 0 14px;
+    margin-bottom: 12px; z-index: 2;
+  }
+  #s20 .v-cta {
+    margin-top: auto; width: 100%;
+    background: linear-gradient(90deg, var(--neon), var(--neon-2));
+    color: #000; padding: 12px 0; border-radius: 10px;
+    font-family: var(--display); font-weight: 700; font-size: 12px;
+    text-align: center; z-index: 2;
+  }
+  #s20 .timeline {
+    text-align: left; max-width: 420px; display: flex; flex-direction: column; gap: 12px;
+  }
+  #s20 .tl-row { display: flex; gap: 16px; align-items: center; }
+  #s20 .tl-time { font-family: var(--mono); font-size: 12px; color: var(--neon); width: 50px; letter-spacing: 0.05em; }
+  #s20 .tl-text { font-family: var(--display); font-size: 15px; color: var(--muted); flex: 1; }
+  #s20 .tl-text strong { color: var(--ink); }
+  #s20 .tl-text .gold { color: var(--gold); font-weight: 700; }
+
+  /* S21 — Equation */
+  #s21 { flex-direction: column; gap: 36px; align-items: center; text-align: center; justify-content: center; }
+  #s21 .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.25em; color: var(--neon); }
+  #s21 h2 { max-width: 1100px; }
+  #s21 .equation-row {
+    display: flex; gap: 14px; align-items: center; justify-content: center;
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(40px, 5vw, 72px);
+    letter-spacing: -0.02em;
+  }
+  #s21 .eq-piece { color: var(--ink); padding: 12px 16px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 8px; min-width: 120px; }
+  #s21 .eq-op { color: var(--dim); font-weight: 400; }
+  #s21 .eq-result { color: var(--neon); padding: 12px 24px; background: rgba(184,255,58,0.08); border: 1px solid var(--neon); border-radius: 8px; }
+  #s21 .eq-result-label { font-family: var(--mono); font-size: 13px; color: var(--neon); letter-spacing: 0.2em; margin-top: 12px; }
+  #s21 .eq-context { font-family: var(--display); font-size: 18px; color: var(--muted); max-width: 800px; line-height: 1.5; }
+  #s21 .eq-context strong { color: var(--ink); }
+
+  /* S22 — Retencion: pregunta */
+  #s22 { flex-direction: column; gap: 28px; align-items: center; text-align: center; justify-content: center; }
+  #s22 .question {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(40px, 5vw, 72px); line-height: 1.15;
+    max-width: 1200px;
+  }
+  #s22 .question .x { color: var(--gold); }
+  #s22 .answer {
+    font-family: var(--display); font-weight: 700;
+    font-size: clamp(24px, 2.6vw, 38px);
+    color: var(--neon);
+  }
+
+  /* S23 — IKEA */
+  #s23 { flex-direction: column; gap: 28px; align-items: center; text-align: center; }
+  #s23 h2 { max-width: 1000px; }
+  #s23 h2 .x { color: var(--gold); font-family: var(--serif); font-style: italic; }
+  #s23 .gap-row { display: flex; gap: 24px; align-items: stretch; max-width: 1200px; width: 100%; }
+  #s23 .gap-card { flex: 1; padding: 32px; border: 1px solid var(--line); background: var(--bg-2); border-radius: 6px; text-align: center; }
+  #s23 .gap-card.shop { border-color: rgba(184,255,58,0.3); background: linear-gradient(180deg, rgba(184,255,58,0.04), var(--bg-2)); }
+  #s23 .gap-card .who { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  #s23 .gap-card.shop .who { color: var(--neon); }
+  #s23 .gap-card .pct { font-family: var(--display); font-weight: 800; font-size: 84px; line-height: 0.95; letter-spacing: -0.04em; }
+  #s23 .gap-card.shop .pct { color: var(--neon); }
+  #s23 .gap-card .desc { font-family: var(--display); font-size: 15px; color: var(--muted); margin-top: 6px; }
+  #s23 .gap-arrow { align-self: center; padding: 0 8px; text-align: center; font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--muted); }
+  #s23 .gap-arrow .delta { font-family: var(--display); font-weight: 800; font-size: 32px; color: var(--gold); display: block; margin: 4px 0; }
+  #s23 .ikea-box {
+    font-family: var(--serif); font-style: italic;
+    font-size: 24px; line-height: 1.4;
+    max-width: 1100px; color: var(--ink);
+    border-left: 3px solid var(--gold);
+    padding: 0 24px;
+    text-align: left;
+  }
+  #s23 .ikea-box .x { color: var(--gold); }
+  #s23 .ikea-box .src { display: block; font-family: var(--mono); font-style: normal; font-size: 11px; color: var(--neon-2); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 12px; }
+
+  /* S24 — palancas retencion intro */
+  #s24 { flex-direction: column; gap: 28px; align-items: center; text-align: center; justify-content: center; }
+  #s24 h2 { max-width: 1100px; }
+  #s24 h2 .x { color: var(--neon); }
+  #s24 .pal-icons { display: flex; gap: 24px; }
+  #s24 .pal-icon-card {
+    width: 120px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg-2);
+  }
+  #s24 .pal-icon-card .ic { font-size: 32px; }
+  #s24 .pal-icon-card .nm { font-family: var(--mono); font-size: 10px; color: var(--neon); letter-spacing: 0.1em; margin-top: 6px; }
+
+  /* S25 — Avatar deteriorating animation */
+  #s25 { flex-direction: column; gap: 24px; align-items: center; }
+  #s25 h2 { text-align: center; max-width: 1100px; }
+  #s25 h2 .x { color: var(--red); font-family: var(--serif); font-style: italic; }
+  #s25 .row { display: flex; gap: 24px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  #s25 .avatar-state {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px;
+    border: 1px solid var(--line);
+    background: var(--bg-2); border-radius: 8px;
+    min-width: 180px;
+    transition: all 400ms ease;
+  }
+  #s25 .avatar-state.day0 { border-color: var(--neon); background: rgba(184,255,58,0.04); }
+  #s25 .avatar-state.day14 { border-color: rgba(255,61,110,0.3); }
+  #s25 .av-img {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, rgba(184,255,58,0.3), transparent 70%);
+    display: flex; align-items: center; justify-content: center;
+    transition: filter 1s ease, background 1s ease;
+    margin-bottom: 12px;
+  }
+  #s25 .av-img.dim { filter: grayscale(0.5) brightness(0.78); background: radial-gradient(circle at 50% 40%, rgba(184,255,58,0.08), transparent 70%); }
+  #s25 .av-img.broken { filter: grayscale(1) brightness(0.4); background: rgba(255,61,110,0.05); }
+  #s25 .av-day { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--muted); margin-bottom: 4px; }
+  #s25 .day0 .av-day { color: var(--neon); }
+  #s25 .day14 .av-day { color: var(--red); }
+  #s25 .av-name { font-family: var(--display); font-weight: 700; font-size: 14px; text-align: center; margin-bottom: 4px; }
+  #s25 .av-stats { font-family: var(--mono); font-size: 10px; color: var(--dim); text-align: center; }
+  #s25 .av-stats .red { color: var(--red); }
+  #s25 .arrow-flow { font-family: var(--mono); font-size: 22px; color: var(--dim); }
+  #s25 .principle-card {
+    margin-top: 8px;
+    padding: 16px 22px;
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+    border-radius: 6px;
+    max-width: 900px; text-align: center;
+  }
+  #s25 .principle-card .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--neon-2); margin-bottom: 6px; }
+  #s25 .principle-card .body { font-family: var(--display); font-size: 16px; color: var(--ink); line-height: 1.5; }
+  #s25 .principle-card .body strong { color: var(--neon); }
+
+  /* S26 — Notification example */
+  #s26 { flex-direction: column; gap: 28px; align-items: center; text-align: center; justify-content: center; }
+  #s26 h2 { max-width: 1100px; }
+  #s26 h2 .x { color: var(--red); }
+  #s26 .notif-compare { display: flex; gap: 50px; align-items: center; }
+  #s26 .nb {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 16px;
+    width: 320px;
+    display: flex; gap: 12px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+  }
+  #s26 .nb.boring { opacity: 0.7; }
+  #s26 .nb.good { border-color: var(--neon); }
+  #s26 .nb .app-ic { width: 38px; height: 38px; border-radius: 8px; background: linear-gradient(135deg, var(--neon), var(--neon-2)); display: flex; align-items: center; justify-content: center; font-size: 18px; flex: 0 0 38px; }
+  #s26 .nb .app-name { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }
+  #s26 .nb .nt-title { font-family: var(--display); font-weight: 700; font-size: 14px; margin-top: 2px; }
+  #s26 .nb .nt-body { font-family: var(--display); font-size: 13px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
+  #s26 .nb .nt-body .x { color: var(--neon); font-weight: 600; }
+  #s26 .nb-vs { font-family: var(--display); font-weight: 800; font-size: 28px; color: var(--magenta); }
+
+  /* S27 — TIENDA POST-VICTORIA */
+  #s27 { flex-direction: column; gap: 28px; align-items: center; text-align: center; }
+  #s27 h2 { max-width: 1100px; }
+  #s27 h2 .x { color: var(--magenta); }
+  #s27 .row { display: flex; gap: 50px; align-items: center; }
+  #s27 .shop-screen,
+  #s35b .shop-screen {
+    background:
+      radial-gradient(circle at 50% 20%, rgba(255,77,210,0.18), transparent 60%),
+      linear-gradient(180deg, #1a0f23, #0a0a0f);
+    padding: 32px 14px 14px;
+    display: flex; flex-direction: column;
+  }
+  #s27 .shop-tag, #s35b .shop-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--magenta); text-align: center; margin: 4px 0 6px; }
+  #s27 .shop-title, #s35b .shop-title { font-family: var(--display); font-weight: 700; font-size: 16px; text-align: center; line-height: 1.1; margin-bottom: 4px; }
+  #s27 .shop-sub, #s35b .shop-sub { font-family: var(--display); font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 14px; }
+  #s27 .shop-grid, #s35b .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  #s27 .shop-item, #s35b .shop-item { background: var(--bg-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 6px; text-align: center; position: relative; }
+  #s27 .shop-item.featured, #s35b .shop-item.featured { border-color: var(--gold); background: rgba(255,200,87,0.06); }
+  #s27 .shop-item .item-ic, #s35b .shop-item .item-ic { font-size: 26px; line-height: 1; }
+  #s27 .shop-item .item-name, #s35b .shop-item .item-name { font-family: var(--mono); font-size: 8px; color: var(--ink); margin: 4px 0; letter-spacing: 0.05em; }
+  #s27 .shop-item .item-price, #s35b .shop-item .item-price { font-family: var(--mono); font-size: 10px; color: var(--neon); font-weight: 700; }
+  #s27 .shop-item .badge-new, #s35b .shop-item .badge-new { position: absolute; top: -5px; right: -5px; background: var(--magenta); color: #000; font-family: var(--mono); font-size: 7px; padding: 2px 5px; border-radius: 3px; letter-spacing: 0.1em; font-weight: 700; }
+  #s27 .shop-cta,
+  #s35b .shop-cta {
+    margin-top: auto;
+    background: linear-gradient(90deg, var(--neon), var(--neon-2));
+    color: #000;
+    padding: 11px 0; border-radius: 10px;
+    font-family: var(--display); font-weight: 700; font-size: 12px; text-align: center;
+  }
+  #s27 .right-side { text-align: left; max-width: 420px; }
+  #s27 .right-side h3 { font-size: 26px; margin-bottom: 12px; }
+  #s27 .right-side h3 .x { color: var(--magenta); }
+  #s27 .right-side p { font-family: var(--display); font-size: 16px; color: var(--muted); line-height: 1.55; margin-bottom: 12px; }
+  #s27 .right-side p strong { color: var(--ink); }
+  #s27 .right-side .impact-line {
+    font-family: var(--mono); font-size: 12px; color: var(--neon);
+    padding: 12px 14px; background: rgba(184,255,58,0.06);
+    border-left: 2px solid var(--neon);
+    line-height: 1.5;
+  }
+
+  /* S28 — Niveles / sistema rangos */
+  #s28 { flex-direction: column; gap: 28px; align-items: center; text-align: center; }
+  #s28 h2 { max-width: 1100px; }
+  #s28 h2 .x { color: var(--gold); }
+  #s28 .ladder { display: flex; gap: 0; align-items: stretch; max-width: 1300px; width: 100%; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  #s28 .rank { flex: 1; padding: 24px 20px; background: var(--bg-2); display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; border-right: 1px solid var(--line); }
+  #s28 .rank:last-child { border-right: none; }
+  #s28 .rank-icon { font-size: 40px; }
+  #s28 .rank-name { font-family: var(--display); font-weight: 700; font-size: 18px; }
+  #s28 .rank-bronze .rank-name { color: var(--bronze); }
+  #s28 .rank-silver .rank-name { color: var(--silver); }
+  #s28 .rank-gold .rank-name { color: var(--gold); }
+  #s28 .rank-plat .rank-name { color: var(--neon-2); }
+  #s28 .rank-leg .rank-name { color: var(--magenta); }
+  #s28 .rank-xp { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }
+  #s28 .rank-perk { font-family: var(--display); font-size: 12px; color: var(--ink); line-height: 1.4; min-height: 40px; }
+  #s28 .rank.current { background: linear-gradient(180deg, rgba(192,192,200,0.08), var(--bg-2)); border-top: 2px solid var(--silver); }
+  #s28 .progression-narrative {
+    font-family: var(--serif); font-style: italic;
+    font-size: 22px; color: var(--muted); max-width: 1100px; line-height: 1.4;
+  }
+  #s28 .progression-narrative .x { color: var(--gold); }
+  #s28 .clan-strip {
+    display: flex; align-items: center; gap: 24px; padding: 16px 22px;
+    border: 1px solid var(--line); background: var(--bg-2); border-radius: 6px;
+    max-width: 1100px;
+  }
+  #s28 .clan-strip .ic { font-size: 28px; }
+  #s28 .clan-strip .text { text-align: left; font-family: var(--display); font-size: 14px; color: var(--muted); line-height: 1.5; }
+  #s28 .clan-strip .text strong { color: var(--ink); }
+  #s28 .clan-strip .text .x { color: var(--magenta); font-weight: 600; }
+
+  /* S29 — pausa */
+  #s29 { flex-direction: column; gap: 28px; align-items: center; text-align: center; }
+  #s29 h2 { max-width: 1100px; }
+  #s29 h2 .x { color: var(--gold); font-family: var(--serif); font-style: italic; }
+  #s29 .row { display: flex; gap: 50px; align-items: center; }
+  #s29 .pause-screen {
+    background: linear-gradient(180deg, #1a1310, #0a0a0f);
+    padding: 36px 18px 18px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  #s29 .pause-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--gold); margin-top: 4px; margin-bottom: 12px; }
+  #s29 .pause-warn { font-size: 36px; margin-bottom: 8px; }
+  #s29 .pause-title { font-family: var(--display); font-weight: 700; font-size: 17px; text-align: center; line-height: 1.1; margin-bottom: 12px; padding: 0 8px; }
+  #s29 .pause-list { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 0 6px; margin-bottom: 14px; }
+  #s29 .pause-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px;
+    background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.05em;
+  }
+  #s29 .pause-item .dot-r { width: 6px; height: 6px; background: var(--red); border-radius: 50%; }
+  #s29 .pause-item .v { color: var(--ink); margin-left: auto; font-weight: 700; }
+  #s29 .pause-cta {
+    margin-top: auto;
+    background: var(--gold);
+    color: #000;
+    padding: 11px 0; border-radius: 10px;
+    font-family: var(--display); font-weight: 700; font-size: 12px;
+    text-align: center; width: 100%;
+  }
+  #s29 .pause-skip {
+    margin-top: 8px;
+    font-family: var(--display); font-size: 11px; color: var(--dim); text-align: center;
+  }
+  #s29 .right-side { text-align: left; max-width: 420px; }
+  #s29 .right-side h3 { font-size: 26px; margin-bottom: 12px; }
+  #s29 .right-side p { font-family: var(--display); font-size: 16px; color: var(--muted); line-height: 1.55; margin-bottom: 12px; }
+  #s29 .right-side p strong { color: var(--ink); }
+  #s29 .right-side .impact-line {
+    font-family: var(--mono); font-size: 12px; color: var(--neon);
+    padding: 12px 14px; background: rgba(184,255,58,0.06);
+    border-left: 2px solid var(--neon);
+    line-height: 1.5;
+  }
+
+  /* S30 — Retencion impacto */
+  #s30 { flex-direction: column; gap: 32px; align-items: center; text-align: center; justify-content: center; }
+  #s30 .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.25em; color: var(--neon); }
+  #s30 .impact-row {
+    display: flex; gap: 32px; align-items: baseline;
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(60px, 8vw, 130px);
+    letter-spacing: -0.04em;
+  }
+  #s30 .impact-row .from { color: var(--dim); text-decoration: line-through; }
+  #s30 .impact-row .arrow { color: var(--dim); font-size: 0.6em; }
+  #s30 .impact-row .to { color: var(--neon); }
+  #s30 .impact-context { font-family: var(--display); font-size: 22px; color: var(--muted); max-width: 900px; line-height: 1.4; }
+  #s30 .impact-context strong { color: var(--ink); }
+
+  /* S31 — Churn intro */
+  #s31 { flex-direction: column; gap: 28px; align-items: center; text-align: center; justify-content: center; }
+  #s31 h2 { max-width: 1100px; }
+  #s31 h2 .x { color: var(--ink); font-family: var(--serif); font-style: italic; }
+  #s31 .lede-2 { font-family: var(--serif); font-style: italic; font-size: 24px; color: var(--muted); max-width: 900px; }
+  #s31 .churn-stat { font-family: var(--display); font-weight: 800; font-size: clamp(120px, 16vw, 220px); color: var(--red); line-height: 0.85; letter-spacing: -0.05em; }
+
+  /* S32 — Churn breakdown */
+  #s32 { flex-direction: column; gap: 24px; align-items: center; }
+  #s32 h2 { text-align: center; max-width: 1100px; }
+  #s32 .stack { display: flex; max-width: 1300px; width: 100%; height: 56px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  #s32 .stack .seg { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--bg); border-right: 1px solid var(--bg); }
+  #s32 .stack .seg:last-child { border-right: none; }
+  #s32 .stack .seg.s41 { background: var(--ink); flex: 41; }
+  #s32 .stack .seg.s24 { background: var(--neon); flex: 24; }
+  #s32 .stack .seg.s17 { background: var(--neon-2); flex: 17; color: var(--bg); }
+  #s32 .stack .seg.s10 { background: var(--gold); flex: 10; }
+  #s32 .stack .seg.s8 { background: var(--red); flex: 8; }
+  #s32 .legend { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; max-width: 1300px; width: 100%; }
+  #s32 .legend-item { padding: 16px; border: 1px solid var(--line); background: var(--bg-2); border-radius: 4px; display: flex; flex-direction: column; gap: 6px; }
+  #s32 .legend-item .head { font-family: var(--mono); font-size: 13px; font-weight: 700; }
+  #s32 .legend-item.l41 .head { color: var(--ink); }
+  #s32 .legend-item.l24 .head { color: var(--neon); }
+  #s32 .legend-item.l17 .head { color: var(--neon-2); }
+  #s32 .legend-item.l10 .head { color: var(--gold); }
+  #s32 .legend-item.l8 .head { color: var(--red); }
+  #s32 .legend-item .reason { font-family: var(--display); font-size: 13px; color: var(--ink); font-weight: 600; }
+  #s32 .legend-item .action { font-family: var(--display); font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  /* S33b — Premium expandido (los 6 beneficios) */
+  #s33b { flex-direction: column; gap: 24px; align-items: center; text-align: center; }
+  #s33b h2 { max-width: 1100px; }
+  #s33b h2 .x { color: var(--magenta); font-style: italic; font-family: var(--serif); }
+  #s33b .subtitle {
+    font-family: var(--serif); font-style: italic;
+    font-size: 20px; color: var(--muted); max-width: 900px;
+  }
+  #s33b .benefits {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    max-width: 1300px; width: 100%;
+  }
+  #s33b .benefit-card {
+    padding: 22px 20px;
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+    border-radius: 10px;
+    display: flex; flex-direction: column; gap: 8px;
+    text-align: left;
+    transition: all 400ms ease;
+  }
+  #s33b .benefit-card.shown {
+    border-color: rgba(255,77,210,0.3);
+    background: linear-gradient(180deg, rgba(255,77,210,0.04), var(--bg-2));
+    box-shadow: 0 0 18px rgba(255,77,210,0.08);
+  }
+  #s33b .benefit-card .b-ic {
+    font-size: 28px;
+    line-height: 1;
+  }
+  #s33b .benefit-card .b-name {
+    font-family: var(--display); font-weight: 700; font-size: 16px;
+    color: var(--ink); line-height: 1.2;
+  }
+  #s33b .benefit-card .b-desc {
+    font-family: var(--display); font-size: 13px;
+    color: var(--muted); line-height: 1.45;
+  }
+  #s33b .benefit-card .b-tag {
+    font-family: var(--mono); font-size: 9px;
+    color: var(--magenta); letter-spacing: 0.15em;
+    margin-top: 4px;
+  }
+  #s33b .price-strip {
+    display: flex; align-items: center; gap: 18px;
+    padding: 14px 22px;
+    background: var(--bg-2);
+    border: 1px solid var(--magenta);
+    border-radius: 100px;
+  }
+  #s33b .price-strip .label {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.15em; color: var(--muted);
+  }
+  #s33b .price-strip .price {
+    font-family: var(--display); font-weight: 800; font-size: 24px;
+    color: var(--magenta);
+  }
+  #s33b .price-strip .small {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+  }
+
+  /* S33 — Premium broken */
+  #s33 { flex-direction: column; gap: 28px; align-items: center; text-align: center; justify-content: center; }
+  #s33 .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.25em; color: var(--magenta); }
+  #s33 .quote {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(36px, 4.4vw, 60px); line-height: 1.2;
+    max-width: 1200px;
+  }
+  #s33 .quote .x { color: var(--magenta); }
+
+  /* S34 — Hipotesis */
+  #s34 { flex-direction: column; gap: 28px; align-items: center; text-align: center; justify-content: center; }
+  #s34 h2 { max-width: 1100px; }
+  #s34 h2 .x { color: var(--magenta); }
+  #s34 .source-quote {
+    font-family: var(--serif); font-style: italic;
+    font-size: 22px; color: var(--muted); max-width: 1000px; line-height: 1.4;
+  }
+  #s34 .source-quote .src {
+    display: block; font-family: var(--mono); font-size: 11px; color: var(--magenta);
+    letter-spacing: 0.2em; margin-top: 14px; text-transform: uppercase;
+  }
+
+  /* S35 — Two screens compare */
+  #s35 { flex-direction: column; gap: 24px; align-items: center; text-align: center; }
+  #s35 h2 { max-width: 1100px; }
+  #s35 h2 .x { color: var(--magenta); }
+  #s35 .compare-row { display: flex; gap: 50px; align-items: center; justify-content: center; }
+  #s35 .variant-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  #s35 .vtag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; padding: 4px 10px; border-radius: 3px; }
+  #s35 .control .vtag { color: var(--muted); border: 1px solid var(--line); }
+  #s35 .test .vtag { color: var(--magenta); border: 1px solid var(--magenta); background: rgba(255,77,210,0.08); }
+  #s35 .control-screen { padding: 36px 16px 16px; background: linear-gradient(180deg, #15102a, #0a0a0f); display: flex; flex-direction: column; align-items: center; }
+  #s35 .test-screen {
+    padding: 36px 16px 16px;
+    background:
+      radial-gradient(circle at 50% 25%, rgba(255,200,87,0.25), transparent 60%),
+      linear-gradient(180deg, #2a1f0a, #0a0a0f);
+    display: flex; flex-direction: column; align-items: center;
+    position: relative;
+  }
+  #s35 .test-screen::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: radial-gradient(2px 2px at 20% 30%, var(--neon), transparent), radial-gradient(2px 2px at 60% 20%, var(--gold), transparent), radial-gradient(2px 2px at 80% 60%, var(--neon-2), transparent);
+    background-size: 200% 200%;
+    animation: confetti 3s linear infinite;
+    opacity: 0.5; pointer-events: none;
+  }
+  #s35 .vs-icon { font-family: var(--display); font-weight: 800; font-size: 36px; color: var(--magenta); }
+  #s35 .v-tag-mini { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--gold); text-align: center; z-index: 2; }
+  #s35 .trophy-mid { font-size: 56px; text-align: center; margin: 8px 0 4px; filter: drop-shadow(0 0 20px rgba(255,200,87,0.5)); z-index: 2; }
+  #s35 .vt-mini { font-family: var(--display); font-weight: 800; font-size: 18px; text-align: center; z-index: 2; }
+  #s35 .vt-sub { font-family: var(--mono); font-size: 9px; color: var(--muted); text-align: center; margin: 4px 0 12px; z-index: 2; }
+  #s35 .xp-mini { font-family: var(--mono); font-size: 10px; color: var(--neon); text-align: center; margin-bottom: 4px; z-index: 2; }
+  #s35 .control .cta-cont { margin-top: auto; background: var(--ink); color: #000; padding: 10px 0; border-radius: 8px; font-family: var(--display); font-weight: 700; font-size: 11px; text-align: center; width: 100%; }
+  #s35 .test .premium-tag { text-align: center; font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--magenta); margin-top: 6px; padding: 4px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); width: 100%; z-index: 2; }
+  #s35 .test .premium-title { text-align: center; font-family: var(--display); font-weight: 700; font-size: 14px; margin-top: 8px; z-index: 2; }
+  #s35 .test .premium-sub { text-align: center; font-family: var(--display); font-size: 10px; color: var(--muted); margin-top: 2px; margin-bottom: 12px; z-index: 2; }
+  #s35 .test .premium-sub .price { color: var(--ink); font-weight: 600; }
+  #s35 .test .cta-pay {
+    background: var(--ink); color: #000;
+    text-align: center; padding: 10px 0; border-radius: 8px;
+    font-family: var(--display); font-weight: 700; font-size: 11px;
+    position: relative; overflow: hidden;
+    width: 100%; z-index: 2;
+  }
+  #s35 .test .cta-pay::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(184,255,58,0.4), transparent);
+    transform: translateX(-100%); animation: shine 3s ease-in-out infinite;
+  }
+  @keyframes shine { to { transform: translateX(100%); } }
+  #s35 .test .skip-btn { text-align: center; font-family: var(--display); font-size: 10px; color: var(--dim); margin-top: 8px; z-index: 2; }
+
+  /* S36 — Result big */
+  #s36 { flex-direction: column; gap: 32px; align-items: center; text-align: center; justify-content: center; }
+  #s36 .result-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.3em; color: var(--magenta); }
+  #s36 .result-num {
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(160px, 22vw, 320px); line-height: 0.85;
+    letter-spacing: -0.06em;
+    color: var(--magenta);
+  }
+  #s36 .result-sign {
+    font-family: var(--display); font-weight: 800; font-size: clamp(40px, 5vw, 70px);
+    color: var(--neon);
+    letter-spacing: -0.03em;
+  }
+  #s36 .result-context {
+    font-family: var(--display); font-size: 20px; color: var(--muted);
+    max-width: 900px; line-height: 1.4;
+  }
+  #s36 .result-context strong { color: var(--ink); }
+  #s36 .check { color: var(--neon); margin-right: 6px; }
+
+  /* S37 — Closing */
+  #s37 { flex-direction: column; gap: 32px; align-items: center; text-align: center; justify-content: center; }
+  #s37 .summary { font-family: var(--mono); font-size: 13px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--neon); display: flex; align-items: center; gap: 18px; }
+  #s37 .summary .sep { color: var(--dim); }
+  #s37 .closing-quote {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(38px, 4.5vw, 64px);
+    line-height: 1.15; max-width: 1200px;
+  }
+  #s37 .closing-quote .hl { color: var(--neon); }
+  #s37 .closing-quote .x {
+    background: linear-gradient(90deg, var(--neon), var(--neon-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  #s37 .signature {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); margin-top: 24px;
+  }
+  #s37 .signature .names { color: var(--ink); }
+  #s37 .signature .sep { color: var(--dim); margin: 0 10px; }
+
+</style>
+</head>
+<body>
+
+<div class="hud">
+  <span class="dot"></span>
+  <span>HEEAL</span>
+  <span class="sep">/</span>
+  <span>GROWTH 2026</span>
+</div>
+
+<div class="progress">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slide-counter" id="slideCounter"><span class="cur">1</span> / <span id="slideTotal">—</span></div>
+</div>
+
+<div class="footer-tag">FRANCO · GUIDO · MATÍAS</div>
+<div class="nav-help"><kbd>←</kbd> <kbd>→</kbd> · <kbd>F</kbd> FULLSCREEN</div>
+
+<div class="deck" id="deck">
+
+  <!-- ========== S1 — PRESS START ========== -->
+  <section class="slide" id="s1" data-animated="false" data-steps="3">
+    <div class="step shown" data-step="0">
+      <div class="game-tag">▸ NUEVA PARTIDA</div>
+    </div>
+    <div class="step" data-step="1">
+      <div class="title-wrap">HE<span class="ral">E</span>AL</div>
+      <div class="subtitle-line">Growth Strategy · Final Boss · 2026</div>
+    </div>
+    <div class="step" data-step="2">
+      <div class="press-start">▶ PRESS ANY KEY TO START</div>
+      <div class="credits">FRANCO SCIRICA · GUIDO MAUTINO · MATÍAS CORTÉS</div>
+    </div>
+  </section>
+
+  <!-- S2 eliminada -->
+
+  <!-- ========== S3 — LA PREGUNTA + QUÉ ES HEEAL (fusión S5+S6) ========== -->
+  <section class="slide" id="s5" data-steps="2" style="padding: 48px 60px;">
+    <div style="display:flex;gap:64px;align-items:center;width:100%;height:100%;">
+
+      <!-- Izquierda: La pregunta -->
+      <div style="flex:1;" class="step" data-step="0">
+        <div class="eyebrow" style="margin-bottom:18px;">LA PREGUNTA QUE NOS HICIMOS</div>
+        <div class="question">¿Por qué la gente sigue<br>jugando un <span class="x">videojuego</span>?</div>
+        <div class="answer" style="margin-top:20px;">
+          Porque cada sesión deja una <strong>huella visible</strong>.<br>
+          Porque irse tiene un <strong>costo</strong>.<br>
+          Porque <strong>el esfuerzo se vuelve tangible</strong>.
+        </div>
+      </div>
+
+      <!-- Divisor -->
+      <div style="width:1px;height:280px;background:var(--line);flex-shrink:0;" class="step" data-step="1"></div>
+
+      <!-- Derecha: Qué es Heeal -->
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;" class="step" data-step="1">
+        <div>
+          <div class="eyebrow" style="margin-bottom:10px;">QUÉ ES HEEAL</div>
+          <h2 style="font-size:clamp(28px,3.2vw,50px);">Un <span class="x">RPG</span> donde el joystick<br>es tu cuerpo.</h2>
+          <div style="font-family:var(--serif);font-style:italic;font-size:18px;color:var(--muted);margin-top:8px;">Entrenás de verdad. Tu avatar progresa de verdad.</div>
+        </div>
+        <div class="phone-frame" style="width:200px;height:416px;border-radius:28px;flex-shrink:0;">
+          <div class="notch" style="width:70px;height:16px;"></div>
+          <div class="screen">
+            <div class="app-screen" style="padding:30px 12px 12px;">
+              <div class="top-bar">
+                <span class="username" style="font-size:8px;">@FRANCOS_07</span>
+                <span class="level-tag" style="font-size:8px;">⚡ NIVEL 7</span>
+              </div>
+              <div class="avatar-circle" style="width:100px;height:100px;">
+                <svg class="avatar-svg" viewBox="0 0 100 100">
+                  <defs><radialGradient id="g5Glow" cx="50%" cy="40%"><stop offset="0%" stop-color="#b8ff3a" stop-opacity="0.4"/><stop offset="100%" stop-color="#b8ff3a" stop-opacity="0"/></radialGradient></defs>
+                  <circle cx="50" cy="40" r="45" fill="url(#g5Glow)"/>
+                  <circle cx="50" cy="38" r="14" fill="#f4f4f6" stroke="#b8ff3a" stroke-width="1.5"/>
+                  <path d="M 30 75 Q 50 55 70 75 L 70 90 L 30 90 Z" fill="#b8ff3a" opacity="0.9"/>
+                  <rect x="36" y="55" width="28" height="6" rx="2" fill="#ffc857"/>
+                </svg>
+              </div>
+              <div class="level-badge" style="font-size:9px;">★ PLATA · 1.350 XP</div>
+              <div class="xp-bar" style="width:80%;"><div class="fill"></div></div>
+              <div class="xp-line" style="font-size:9px;">650 XP para Oro</div>
+              <div class="stats-row" style="gap:4px;margin-top:8px;">
+                <div class="stat-mini gold"><div class="l" style="font-size:6px;">RACHA</div><div class="v" style="font-size:12px;">7</div></div>
+                <div class="stat-mini"><div class="l" style="font-size:6px;">DUELOS</div><div class="v" style="font-size:12px;">12</div></div>
+                <div class="stat-mini"><div class="l" style="font-size:6px;">WINS</div><div class="v" style="font-size:12px;">8</div></div>
+              </div>
+              <div class="duel-cta" style="font-size:10px;padding:8px 0;margin-top:10px;">⚔ ENTRAR A DUELO</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--neon);letter-spacing:0.1em;">
+          Sudás → Subís de nivel → Competís → Volvés
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- S7 eliminada — contenido del loop integrado en otras diapositivas -->
+
+  <!-- S8 eliminada como slide independiente — objetivos integrados en S11 -->
+
+  <!-- S9 eliminada (NSM Pregunta) -->
+
+  <!-- ========== S10 — NSM REVEAL ========== -->
+  <section class="slide" id="s10" data-animated="false" data-steps="3">
+    <div class="step shown" data-step="0">
+      <div class="nsm-tag">▸ NUESTRA NSM</div>
+    </div>
+    <div class="step" data-step="1">
+      <div>
+        <div class="nsm-name">Weekly Active Game<br>Progress Users</div>
+        <div class="nsm-acro">— WAGPU —</div>
+      </div>
+    </div>
+    <div class="step" data-step="2">
+      <div class="nsm-def">
+        Usuarios únicos por semana que completan al menos una sesión en la que su <span class="x">esfuerzo físico real</span> se traduce en <span class="x">progreso visible del avatar</span>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S11 — GOI TREE (Mermaid-based) ========== -->
+  <section class="slide" id="s11" data-steps="4" style="padding: 28px 44px 28px;">
+    <div style="display:flex;flex-direction:column;gap:6px;width:100%;align-items:center;">
+
+      <!-- STEP 0: TÍTULO + NSM -->
+      <div class="step" data-step="0" style="text-align:center;width:100%;">
+        <div class="goi-eyebrow">▸ GOI TREE · DE LA NSM A LAS IDEAS</div>
+        <div class="goi-title" style="font-size:clamp(14px,1.4vw,20px);margin-top:2px;color:var(--muted);font-family:var(--display);">North Star → Objetivos → Oportunidades → Ideas</div>
+      </div>
+
+      <div class="step" data-step="0" style="display:flex;justify-content:center;width:100%;">
+        <div class="goi-node nsm" style="min-width:420px;padding:10px 24px;">
+          <div class="goi-tag">NORTH STAR METRIC</div>
+          <div class="goi-name" style="font-size:20px;">WAGPU</div>
+          <div class="goi-desc">Cantidad de usuarios que realizan una batalla al menos una vez a la semana</div>
+        </div>
+      </div>
+
+      <!-- CONNECTOR NSM → ÁREAS (aparece con Goals) -->
+      <div class="step" data-step="1" style="width:100%;height:16px;padding:0 18%;">
+        <svg viewBox="0 0 1000 32" preserveAspectRatio="none" style="width:100%;height:100%;">
+          <path fill="none" stroke="var(--neon)" stroke-width="1.5" opacity="0.4" d="M 500 0 L 500 16 L 160 16 L 160 32" />
+          <path fill="none" stroke="var(--neon)" stroke-width="1.5" opacity="0.4" d="M 500 16 L 500 32" />
+          <path fill="none" stroke="var(--neon)" stroke-width="1.5" opacity="0.4" d="M 500 16 L 840 16 L 840 32" />
+        </svg>
+      </div>
+
+      <!-- STEP 1: GOALS + INPUT METRICS -->
+      <div class="step" data-step="1" style="display:flex;gap:10px;width:100%;align-items:stretch;">
+        <div class="goi-node area activacion" style="flex:1.35;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;padding:10px 12px;">
+          <div style="font-family:var(--mono);font-size:7px;letter-spacing:0.2em;color:var(--neon-2);margin-bottom:3px;">▸ GOAL</div>
+          <div class="goi-tag" style="font-size:11px;font-family:var(--display);font-weight:700;color:var(--ink);letter-spacing:-0.01em;margin-bottom:4px;">Activación</div>
+          <div style="font-family:var(--display);font-size:9px;color:var(--muted);line-height:1.5;margin-bottom:6px;">Usuarios que completan el setup y juegan su primera batalla</div>
+          <div style="font-family:var(--display);font-weight:800;font-size:14px;color:var(--neon-2);letter-spacing:-0.01em;">45% → <span style="color:var(--ink);">75%</span></div>
+        </div>
+        <div class="goi-node area retencion" style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;padding:10px 12px;">
+          <div style="font-family:var(--mono);font-size:7px;letter-spacing:0.2em;color:var(--gold);margin-bottom:3px;">▸ GOAL</div>
+          <div class="goi-tag" style="font-size:11px;font-family:var(--display);font-weight:700;color:var(--ink);letter-spacing:-0.01em;margin-bottom:4px;">Retención D90</div>
+          <div style="font-family:var(--display);font-size:9px;color:var(--muted);line-height:1.5;margin-bottom:6px;">Usuarios activos 90 días después de su primera sesión</div>
+          <div style="font-family:var(--display);font-weight:800;font-size:14px;color:var(--gold);letter-spacing:-0.01em;">15% → <span style="color:var(--ink);">30%</span></div>
+        </div>
+        <div class="goi-node area monetizacion" style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;padding:10px 12px;">
+          <div style="font-family:var(--mono);font-size:7px;letter-spacing:0.2em;color:var(--magenta);margin-bottom:3px;">▸ GOAL</div>
+          <div class="goi-tag" style="font-size:11px;font-family:var(--display);font-weight:700;color:var(--ink);letter-spacing:-0.01em;margin-bottom:4px;">Monetización</div>
+          <div style="font-family:var(--display);font-size:9px;color:var(--muted);line-height:1.5;margin-bottom:6px;">Suscriptores premium activos al mes</div>
+          <div style="font-family:var(--display);font-weight:800;font-size:14px;color:var(--magenta);letter-spacing:-0.01em;">5.500 → <span style="color:var(--ink);">15.000</span></div>
+        </div>
+      </div>
+
+      <div class="step" data-step="1" style="display:flex;gap:10px;width:100%;align-items:stretch;">
+        <div class="goi-input-card" style="flex:1.35;padding:6px 10px;">
+          <div class="goi-input-title" style="font-size:7px;">INPUT METRICS</div>
+          <div class="goi-input-item" style="font-size:8.5px;">· Churn mensual de cohortes</div>
+          <div class="goi-input-item" style="font-size:8.5px;">· Tasa de Activación = Activados/Registros</div>
+          <div class="goi-input-item" style="font-size:8.5px;">· % que completan setup</div>
+        </div>
+        <div class="goi-input-card" style="flex:1;padding:6px 10px;">
+          <div class="goi-input-title" style="font-size:7px;">INPUT METRICS</div>
+          <div class="goi-input-item" style="font-size:8.5px;">· DAU · WAU · NPS</div>
+          <div class="goi-input-item" style="font-size:8.5px;">· Recurrencia DAU/WAU</div>
+          <div class="goi-input-item" style="font-size:8.5px;">· Churn mensual</div>
+        </div>
+        <div class="goi-input-card" style="flex:1;padding:6px 10px;">
+          <div class="goi-input-title" style="font-size:7px;">INPUT METRICS</div>
+          <div class="goi-input-item" style="font-size:8.5px;">· MRR</div>
+          <div class="goi-input-item" style="font-size:8.5px;">· ARPU</div>
+          <div class="goi-input-item" style="font-size:8.5px;">· Conversión Free → Premium</div>
+        </div>
+      </div>
+
+      <!-- STEP 2: OPORTUNIDADES -->
+      <div class="step" data-step="2" style="display:flex;gap:10px;width:100%;height:12px;">
+        <div style="flex:1.35;padding:0 20%;">
+          <svg viewBox="0 0 100 24" preserveAspectRatio="none" style="width:100%;height:100%;">
+            <path fill="none" stroke="var(--neon-2)" stroke-width="1.5" opacity="0.35" d="M 50 0 L 50 12 L 20 12 L 20 24" />
+            <path fill="none" stroke="var(--neon-2)" stroke-width="1.5" opacity="0.35" d="M 50 12 L 80 12 L 80 24" />
+          </svg>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;">
+          <svg viewBox="0 0 10 24" preserveAspectRatio="none" style="width:10px;height:100%;">
+            <path fill="none" stroke="var(--gold)" stroke-width="1.5" opacity="0.35" d="M 5 0 L 5 24" />
+          </svg>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;">
+          <svg viewBox="0 0 10 24" preserveAspectRatio="none" style="width:10px;height:100%;">
+            <path fill="none" stroke="var(--magenta)" stroke-width="1.5" opacity="0.35" d="M 5 0 L 5 24" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="step" data-step="2" style="display:flex;gap:10px;width:100%;align-items:stretch;">
+        <div style="flex:1.35;display:flex;gap:6px;">
+          <div class="goi-node opportunity" style="flex:1;padding:7px 8px;">
+            <div class="goi-otype" style="font-size:7px;color:var(--neon-2);">▸ OPORTUNIDAD</div>
+            <div class="goi-otitle" style="font-size:10px;">Fricción en configuración</div>
+            <div class="goi-onote" style="font-size:8.5px;">19.5k usuarios se pierden al seleccionar plan. El 39% reporta problemas en setup.</div>
+          </div>
+          <div class="goi-node opportunity" style="flex:1;padding:7px 8px;">
+            <div class="goi-otype" style="font-size:7px;color:var(--neon-2);">▸ OPORTUNIDAD</div>
+            <div class="goi-otitle" style="font-size:10px;">Fuga del Core Value</div>
+            <div class="goi-onote" style="font-size:8.5px;">50.6k usuarios se van antes de aprender habilidades. 43.7k antes del primer duelo.</div>
+          </div>
+        </div>
+        <div class="goi-node opportunity" style="flex:1;padding:7px 8px;">
+          <div class="goi-otype" style="font-size:7px;color:var(--gold);">▸ OPORTUNIDAD</div>
+          <div class="goi-otitle" style="font-size:10px;">Costo emocional de abandono</div>
+          <div class="goi-onote" style="font-size:8.5px;">El 64% se pierde en semana 1. No hay hook de regreso. El avatar no deteriora, no hay racha, no hay narrativa.</div>
+        </div>
+        <div class="goi-node opportunity" style="flex:1;padding:7px 8px;">
+          <div class="goi-otype" style="font-size:7px;color:var(--magenta);">▸ OPORTUNIDAD</div>
+          <div class="goi-otitle" style="font-size:10px;">Upselling en pico emocional</div>
+          <div class="goi-onote" style="font-size:8.5px;">2,5% de up-selling. La oferta aparece en frío, en un menú donde nadie toma decisiones de compra.</div>
+        </div>
+      </div>
+
+      <!-- STEP 3: IDEAS -->
+      <div class="step" data-step="3" style="display:flex;gap:10px;width:100%;height:10px;">
+        <div style="flex:1.35;padding:0 10%;">
+          <svg viewBox="0 0 100 20" preserveAspectRatio="none" style="width:100%;height:100%;">
+            <path fill="none" stroke="var(--neon-2)" stroke-width="1" opacity="0.3" d="M 25 0 L 25 20" />
+            <path fill="none" stroke="var(--neon-2)" stroke-width="1" opacity="0.3" d="M 75 0 L 75 20" />
+          </svg>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;">
+          <svg viewBox="0 0 100 20" preserveAspectRatio="none" style="width:40%;height:100%;">
+            <path fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.3" d="M 50 0 L 50 20" />
+          </svg>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;">
+          <svg viewBox="0 0 100 20" preserveAspectRatio="none" style="width:40%;height:100%;">
+            <path fill="none" stroke="var(--magenta)" stroke-width="1" opacity="0.3" d="M 50 0 L 50 20" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="step" data-step="3" style="display:flex;gap:10px;width:100%;align-items:flex-start;">
+        <div style="flex:1.35;">
+          <div style="font-family:var(--mono);font-size:7.5px;letter-spacing:0.2em;color:var(--neon-2);margin-bottom:5px;font-weight:700;">▸ IDEAS</div>
+          <div style="display:flex;gap:6px;">
+            <div class="goi-cluster" style="flex:1;padding:0 2px;">
+              <div class="goi-idea" style="font-size:8px;padding:3px 6px;"><span class="i-icon" style="font-size:9px;">⚔️</span>Quick Start - Arquetipos</div>
+            </div>
+            <div class="goi-cluster" style="flex:1;padding:0 2px;gap:3px;display:flex;flex-direction:column;">
+              <div class="goi-idea" style="font-size:8px;padding:3px 6px;"><span class="i-icon" style="font-size:9px;">⏱️</span>Micro-entrenamiento</div>
+              <div class="goi-idea" style="font-size:8px;padding:3px 6px;"><span class="i-icon" style="font-size:9px;">🤖</span>Primera batalla / Duelo guiado</div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-family:var(--mono);font-size:7.5px;letter-spacing:0.2em;color:var(--gold);margin-bottom:5px;font-weight:700;">▸ IDEAS</div>
+          <div class="goi-cluster" style="padding:0 2px;gap:3px;display:flex;flex-direction:column;">
+            <div class="goi-idea" style="font-size:8px;padding:3px 6px;"><span class="i-icon" style="font-size:9px;">💔</span>Rachas visibles con riesgo real</div>
+            <div class="goi-idea" style="font-size:8px;padding:3px 6px;"><span class="i-icon" style="font-size:9px;">🛍️</span>Tienda post batalla</div>
+            <div class="goi-idea" style="font-size:8px;padding:3px 6px;"><span class="i-icon" style="font-size:9px;">🏆</span>Temporadas activas</div>
+            <div class="goi-idea" style="font-size:8px;padding:3px 6px;"><span class="i-icon" style="font-size:9px;">📊</span>Progreso comparativo</div>
+            <div class="goi-idea" style="font-size:8px;padding:3px 6px;"><span class="i-icon" style="font-size:9px;">⏸️</span>Flujos anti-churn · pausas</div>
+          </div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-family:var(--mono);font-size:7.5px;letter-spacing:0.2em;color:var(--magenta);margin-bottom:5px;font-weight:700;">▸ IDEAS</div>
+          <div class="goi-cluster" style="padding:0 2px;gap:3px;display:flex;flex-direction:column;">
+            <div class="goi-idea" style="font-size:8px;padding:3px 6px;"><span class="i-icon" style="font-size:9px;">🏪</span>Tienda post-victoria</div>
+            <div class="goi-idea" style="font-size:8px;padding:3px 6px;"><span class="i-icon" style="font-size:9px;">⚡</span>Free Trial post-victoria</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========== S12 — SEGMENTACIÓN + TRADE-OFF ========== -->
+  <section class="slide" id="s12" data-steps="1" data-animated="false" style="padding:36px 64px;">
+    <div style="display:flex;flex-direction:column;gap:14px;align-items:center;width:100%;max-width:1360px;">
+
+      <div class="step" data-step="0" style="text-align:center;">
+        <div class="eyebrow" style="margin-bottom:8px;">SEGMENTACIÓN<span class="sep">/</span>DECISIÓN ESTRATÉGICA</div>
+        <h2 style="font-size:clamp(28px,3.2vw,50px);">Toda la inversión va al <span class="x">Techie Motivado.</span></h2>
+        <div style="font-family:var(--serif);font-style:italic;font-size:clamp(15px,1.4vw,20px);color:var(--muted);margin-top:6px;max-width:900px;">
+          Al cruzar datos cuantitativos con análisis cualitativo, el patrón fue consistente: cada segmento se rompe en un punto distinto. Solo uno permite escalar el negocio sin romper el modelo económico.
+        </div>
+      </div>
+
+      <div class="seg-grid step" data-step="0">
+        <div class="seg-card win">
+          <div class="badge">▲ MOTOR DE REVENUE · 60% DEL INGRESO · <span style="color:var(--neon);">NUESTRO FOCO</span></div>
+          <span class="who-emoji">🎮</span>
+          <h3>Techie Motivado</h3>
+          <div class="role">"Sabe qué quiere. El producto no lo deja llegar."</div>
+          <div class="summary">Entiende la gamificación, conecta con el avatar, monetiza. Pero el <strong>27,6% se traba en el setup</strong> antes de poder jugar. Problema operativo, no conceptual. El más rentable de resolver.</div>
+        </div>
+        <div class="seg-card lose">
+          <div class="badge">▼ CHURN ESTRUCTURAL · ACEPTAMOS EL CHURN</div>
+          <span class="who-emoji">🏋️</span>
+          <h3>Fitness Freak</h3>
+          <div class="role">"Vino a entrenar. No a jugar."</div>
+          <div class="summary">El 81% empieza a entrenar, el 99% termina. Pero el <strong>56% colapsa post-entreno</strong> cuando aparece la gamificación. Fricción cognitiva, no operativa. Retenerlo diluiría el PMF.</div>
+        </div>
+      </div>
+
+      <div class="step" data-step="0" style="width:100%;max-width:1300px;text-align:center;">
+        <div class="decision-eyebrow">▸ LA DECISIÓN DE FONDO</div>
+        <div class="decision-block">
+          El Techie Motivado es el único que hoy permite escalar sin romper el modelo económico.<br>
+          <span style="color:var(--muted);font-size:0.8em;">No porque el Fitness Freak no importe, sino porque el Techie financia el crecimiento, valida el PMF y justifica la inversión.</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========== S15 — 3 OPORTUNIDADES + ICE SCORES ========== -->
+  <section class="slide" id="s15" data-steps="1" data-animated="false" style="padding:44px 60px;">
+    <div style="display:flex;flex-direction:column;gap:20px;align-items:center;width:100%;max-width:1400px;">
+
+      <div class="step" data-step="0" style="text-align:center;">
+        <div class="eyebrow" style="margin-bottom:8px;">▸ ESTRATEGIA · TRES PALANCAS PRIORIZADAS POR ICE</div>
+        <h2 style="font-size:clamp(26px,3.2vw,48px);">Las oportunidades que mueven los cuatro objetivos.</h2>
+      </div>
+
+      <div class="step" data-step="0" style="display:flex;gap:16px;width:100%;align-items:stretch;">
+
+        <!-- PALANCA 1: ACTIVACIÓN -->
+        <div style="flex:1;border:1px solid rgba(0,229,255,0.35);border-radius:10px;background:linear-gradient(180deg,rgba(0,229,255,0.05),var(--bg-2));padding:22px;display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.25em;color:var(--neon-2);">PALANCA 01 · ACTIVACIÓN</div>
+            <div style="font-family:var(--display);font-weight:700;font-size:20px;margin-top:6px;line-height:1.1;">Rediseñar el Onboarding</div>
+            <div style="font-family:var(--serif);font-style:italic;font-size:13px;color:var(--muted);margin-top:4px;line-height:1.4;">El Techie se traba en el setup. La solución es convertir el onboarding en el primer nivel del juego.</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--neon-2);padding:8px 12px;border:1px solid rgba(0,229,255,0.2);border-radius:5px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--dim);text-decoration:line-through;">45%</span>
+            <span style="color:var(--dim);">→</span>
+            <span style="font-weight:700;color:var(--neon-2);">70% activación</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+            <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.15em;color:var(--muted);">IDEAS PRIORIZADAS · ICE SCORE</div>
+            <div style="border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--muted);">Q1 · I:9 C:8 E:6</div>
+                <div style="font-family:var(--display);font-weight:600;font-size:13px;">⚔️ Arquetipos de clase RPG</div>
+              </div>
+              <div style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--neon-2);">432</div>
+            </div>
+            <div style="border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--muted);">Q1 · I:8 C:8 E:6</div>
+                <div style="font-family:var(--display);font-weight:600;font-size:13px;">⏱️ Misión calibración 5 min</div>
+              </div>
+              <div style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--neon-2);">384</div>
+            </div>
+            <div style="border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--muted);">Q3 · I:9 C:7 E:5</div>
+                <div style="font-family:var(--display);font-weight:600;font-size:13px;">🤖 Duelo bot garantizado</div>
+              </div>
+              <div style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--neon-2);">315</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PALANCA 2: RETENCIÓN + CHURN -->
+        <div style="flex:1;border:1px solid rgba(255,200,87,0.35);border-radius:10px;background:linear-gradient(180deg,rgba(255,200,87,0.05),var(--bg-2));padding:22px;display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.25em;color:var(--gold);">PALANCA 02 · RETENCIÓN + CHURN</div>
+            <div style="font-family:var(--display);font-weight:700;font-size:20px;margin-top:6px;line-height:1.1;">Cerrar el Core Loop</div>
+            <div style="font-family:var(--serif);font-style:italic;font-size:13px;color:var(--muted);margin-top:4px;line-height:1.4;">El 64% se va en semana 1. Construir costo emocional de abandono: que irse duela.</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--gold);padding:8px 12px;border:1px solid rgba(255,200,87,0.2);border-radius:5px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--dim);text-decoration:line-through;">D90 15%</span>
+            <span style="color:var(--dim);">→</span>
+            <span style="font-weight:700;color:var(--gold);">30% retención</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+            <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.15em;color:var(--muted);">IDEAS PRIORIZADAS · ICE SCORE</div>
+            <div style="border:1px solid rgba(255,200,87,0.25);border-radius:6px;padding:10px 12px;background:rgba(255,200,87,0.04);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--gold);">Q1 · I:8 C:8 E:7 · <span style="color:var(--neon);">Churn ↓ inmediato</span></div>
+                <div style="font-family:var(--display);font-weight:600;font-size:13px;">💔 Rachas + avatar deteriora</div>
+              </div>
+              <div style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--gold);">448</div>
+            </div>
+            <div style="border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--muted);">Q3 · I:8 C:6 E:5</div>
+                <div style="font-family:var(--display);font-weight:600;font-size:13px;">🏆 Sistema de rangos</div>
+              </div>
+              <div style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--gold);">240</div>
+            </div>
+            <div style="border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--muted);">Q4 · I:9 C:5 E:3</div>
+                <div style="font-family:var(--display);font-weight:600;font-size:13px;">⏸️ Pantalla anti-churn + pausa</div>
+              </div>
+              <div style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--gold);">135</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PALANCA 3: MONETIZACIÓN -->
+        <div style="flex:1;border:1px solid rgba(255,77,210,0.35);border-radius:10px;background:linear-gradient(180deg,rgba(255,77,210,0.05),var(--bg-2));padding:22px;display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.25em;color:var(--magenta);">PALANCA 03 · MONETIZACIÓN</div>
+            <div style="font-family:var(--display);font-weight:700;font-size:20px;margin-top:6px;line-height:1.1;">Monetización Contextual</div>
+            <div style="font-family:var(--serif);font-style:italic;font-size:13px;color:var(--muted);margin-top:4px;line-height:1.4;">Los Techies pagan por estatus y desempeño. La oferta debe aparecer en el pico emocional correcto.</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--magenta);padding:8px 12px;border:1px solid rgba(255,77,210,0.2);border-radius:5px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--dim);text-decoration:line-through;">4,2%</span>
+            <span style="color:var(--dim);">→</span>
+            <span style="font-weight:700;color:var(--magenta);">9,5% conversión</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+            <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.15em;color:var(--muted);">IDEAS PRIORIZADAS · ICE SCORE</div>
+            <div style="border:1px solid rgba(255,77,210,0.25);border-radius:6px;padding:10px 12px;background:rgba(255,77,210,0.04);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--magenta);">Q2 · I:9 C:7 E:6 · <span style="color:var(--neon);">+80,9% validado</span></div>
+                <div style="font-family:var(--display);font-weight:600;font-size:13px;">⚡ Oferta post-victoria</div>
+              </div>
+              <div style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--magenta);">378</div>
+            </div>
+            <div style="border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--muted);">Q2 · I:8 C:7 E:6</div>
+                <div style="font-family:var(--display);font-weight:600;font-size:13px;">🛍️ Tienda en pico emocional</div>
+              </div>
+              <div style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--magenta);">336</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="step" data-step="0" style="text-align:center;">
+        <div style="font-family:var(--serif);font-style:italic;font-size:16px;color:var(--muted);max-width:900px;line-height:1.4;">
+          Estas tres palancas están diseñadas para impactar directamente los cuatro objetivos estratégicos de 2026 y asegurar el efecto multiplicador de <span style="color:var(--neon);font-weight:600;">×4,5</span> y el objetivo de <span style="color:var(--neon);font-weight:600;">300.000€ ARR</span>.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========== S16 — EL FUNNEL + POR QUÉ PASA ========== -->
+  <section class="slide" id="s16" data-animated="false" data-steps="5" style="padding:44px 64px;">
+    <div style="display:flex;flex-direction:column;gap:20px;width:100%;align-items:center;">
+
+      <div class="step" data-step="0" style="text-align:center;">
+        <div class="eyebrow">ACTIVACIÓN<span class="sep">/</span>DIAGNÓSTICO</div>
+        <h2 style="font-size:clamp(30px,3.6vw,56px);">El embudo se desangra<br><span class="x">antes de entregar valor.</span></h2>
+      </div>
+
+      <div style="display:flex;gap:40px;align-items:stretch;width:100%;max-width:1300px;">
+
+        <!-- Funnel izquierda -->
+        <div style="flex:1.2;">
+          <div class="funnel step" data-step="1" style="width:100%;">
+            <div class="f-row">
+              <div class="name">Registro</div>
+              <div class="f-bar"><div class="fill" style="--w: 1;"></div></div>
+              <div class="val">100%</div>
+            </div>
+            <div class="f-row">
+              <div class="name">Setup completo</div>
+              <div class="f-bar"><div class="fill" style="--w: 0.78;"></div></div>
+              <div class="val">78%</div>
+            </div>
+            <div class="f-row problem">
+              <div class="name">Plan seleccionado <span style="color: var(--red); font-family: var(--mono); font-size: 11px;">−27,6%</span></div>
+              <div class="f-bar problem"><div class="fill" style="--w: 0.56;"></div></div>
+              <div class="val">56%</div>
+            </div>
+            <div class="f-row">
+              <div class="name">Primer entreno</div>
+              <div class="f-bar"><div class="fill" style="--w: 0.47;"></div></div>
+              <div class="val">47%</div>
+            </div>
+            <div class="f-row problem">
+              <div class="name">Primer duelo (activado)</div>
+              <div class="f-bar problem"><div class="fill" style="--w: 0.45;"></div></div>
+              <div class="val">45%</div>
+            </div>
+          </div>
+          <div class="step" data-step="2" style="margin-top:16px;text-align:center;">
+            <div style="font-family:var(--serif);font-style:italic;font-size:18px;color:var(--muted);">
+              <strong style="color:var(--red);">85.937</strong> usuarios se pierden antes del primer duelo.
+            </div>
+          </div>
+        </div>
+
+        <!-- Separador -->
+        <div style="width:1px;background:var(--line);flex-shrink:0;" class="step" data-step="3"></div>
+
+        <!-- Por qué pasa - derecha -->
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+          <div class="step" data-step="3">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.2em;color:var(--neon);margin-bottom:14px;">▸ POR QUÉ PASA ESTO</div>
+            <div style="font-family:var(--serif);font-style:italic;font-size:clamp(20px,2vw,28px);line-height:1.4;color:var(--ink);">
+              Imaginate que llegás al gimnasio por primera vez.
+            </div>
+            <div style="font-family:var(--serif);font-style:italic;font-size:clamp(20px,2vw,28px);line-height:1.4;color:var(--ink);margin-top:12px;">
+              Antes de tocar un peso te sientan <span style="color:var(--neon);">40 minutos</span> a planificar los próximos 6 meses.
+            </div>
+          </div>
+          <div class="step" data-step="4">
+            <div style="font-family:var(--display);font-weight:700;font-size:clamp(18px,1.8vw,26px);color:var(--gold);margin-top:20px;">
+              Eso es Heeal hoy.
+            </div>
+            <div style="font-family:var(--display);font-size:14px;color:var(--muted);margin-top:16px;line-height:1.5;">
+              El producto pide <strong style="color:var(--ink);">pensar demasiado</strong> antes de dejar <strong style="color:var(--ink);">sentir</strong>. 37 opciones de plan. Configuración manual. Setup que tarda más que el primer entreno.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- S17 eliminada — contenido integrado en S16 -->
+
+  <!-- ========== S18 — ANTES vs DESPUÉS (arquetipos) ========== -->
+  <section class="slide" id="s18" data-steps="3">
+    <div class="step shown" data-step="0">
+      <div class="eyebrow">ACTIVACIÓN<span class="sep">/</span>PALANCA 1 · ARQUETIPOS RPG</div>
+      <h2>De <span style="color: var(--red);">37 opciones</span> a <span class="x">1 clic.</span></h2>
+    </div>
+    <div class="compare">
+      <div class="before step" data-step="0">
+        <div class="vlabel">▼ HOY</div>
+        <div class="phone-frame">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="wall-screen">
+              <div class="wall-step">PASO 04 / 12</div>
+              <div class="wall-title" style="color: var(--red);">Elegí tu plan</div>
+              <div class="wall-list">
+                <div class="opt">FUERZA · PRINCIPIANTE</div>
+                <div class="opt">FUERZA · INTERMEDIO</div>
+                <div class="opt">FUERZA · AVANZADO</div>
+                <div class="opt">CARDIO · PRINCIPIANTE</div>
+                <div class="opt">CARDIO · INTERMEDIO</div>
+                <div class="opt">CARDIO · AVANZADO</div>
+                <div class="opt">HIIT · 15 MIN</div>
+                <div class="opt">HIIT · 30 MIN</div>
+                <div class="opt">HIIT · 45 MIN</div>
+                <div class="opt">YOGA · MAÑANA</div>
+                <div class="opt">YOGA · NOCHE</div>
+                <div class="opt">FUNCIONAL · CASA</div>
+                <div class="opt">FUNCIONAL · GYM</div>
+                <div class="opt">PILATES · BÁSICO</div>
+                <div class="opt">PILATES · CORE</div>
+                <div class="opt">CROSSFIT · WOD</div>
+                <div class="opt">CALISTENIA</div>
+                <div class="opt">PERDER PESO</div>
+                <div class="opt">GANAR MASA</div>
+                <div class="opt">+ 18 MÁS...</div>
+              </div>
+              <div class="wall-cta">SIGUIENTE →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vs-label step" data-step="1">VS</div>
+
+      <div class="after step" data-step="2">
+        <div class="vlabel">▲ HEEAL 2026</div>
+        <div class="phone-frame">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="archetype-screen" style="height: 100%; display: flex; flex-direction: column;">
+              <div class="archetype-step">PASO 02 / 03 · CREÁ TU PERSONAJE</div>
+              <div class="archetype-title">Elegí tu clase</div>
+              <div class="archetype-sub">Tu plan se configura solo. Empezás en 1 clic.</div>
+              <div class="arch-list">
+                <div class="arch-card" data-arch="warrior">
+                  <div class="arch-icon warrior">⚔️</div>
+                  <div class="arch-info">
+                    <div class="arch-name">Guerrero</div>
+                    <div class="arch-desc">Fuerza · alta intensidad</div>
+                  </div>
+                  <div class="arch-check">✓</div>
+                </div>
+                <div class="arch-card selected" data-arch="explorer">
+                  <div class="arch-icon explorer">🏃</div>
+                  <div class="arch-info">
+                    <div class="arch-name">Explorador</div>
+                    <div class="arch-desc">Cardio · constancia</div>
+                  </div>
+                  <div class="arch-check">✓</div>
+                </div>
+                <div class="arch-card" data-arch="balance">
+                  <div class="arch-icon balance">⚡</div>
+                  <div class="arch-info">
+                    <div class="arch-name">Equilibrio</div>
+                    <div class="arch-desc">Mixto · funcional</div>
+                  </div>
+                  <div class="arch-check">✓</div>
+                </div>
+              </div>
+              <div class="arch-cta">CONTINUAR · +50 XP</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S19 — CALIBRACIÓN 5 MIN ========== -->
+  <section class="slide" id="s19" data-steps="4">
+    <div class="step shown" data-step="0">
+      <div class="eyebrow">ACTIVACIÓN<span class="sep">/</span>PALANCA 2 · MISIÓN DE CALIBRACIÓN</div>
+      <h2>Antes de jugar — <span class="x">5 minutos.</span></h2>
+    </div>
+    <div class="row">
+      <div class="step scale-in" data-step="0">
+        <div class="phone-frame">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="calib-screen">
+              <div class="calib-tag">▸ MISIÓN DE CALIBRACIÓN</div>
+              <div class="calib-title">Calibrá tu avatar<br>antes de la primera batalla</div>
+              <div class="calib-sub">Sin opciones. Sin fricción. Solo acción.</div>
+              <div class="timer-circle">
+                <div class="timer-num">5:00</div>
+                <div class="timer-label">MINUTOS</div>
+              </div>
+              <div class="calib-task">⚡ 20 sentadillas · 10 burpees · 30 seg de plancha</div>
+              <div class="calib-cta">EMPEZAR AHORA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" data-step="1">
+        <div class="reasoning">
+          <div class="principle">▸ FOOT-IN-THE-DOOR</div>
+          <h3 style="margin-top: 8px;">Compromiso pequeño,<br>impulso para continuar.</h3>
+          <p>Freedman & Fraser (Stanford 1966): grupos con pedido inicial mínimo lograron <strong>76% de compliance</strong>. Vs <strong>17%</strong> con pedido grande.</p>
+          <p>Y el dato propio: <strong>el 99% de los que empiezan un entreno lo terminan</strong>. El problema es llegar al primer clic de "empezar".</p>
+          <div class="src">FREEDMAN & FRASER · STANFORD · 1966</div>
+        </div>
+      </div>
+    </div>
+    <div class="step" data-step="1">
+      <div class="lede" style="text-align: center; max-width: 900px;">No hay 100 ejercicios para elegir.<br>Hay <strong style="color: var(--ink);">una misión.</strong></div>
+    </div>
+  </section>
+
+  <!-- ========== S20 — VICTORIA / Aha Moment ========== -->
+  <section class="slide" id="s20" data-steps="4">
+    <div class="step shown" data-step="0">
+      <div class="eyebrow gold">ACTIVACIÓN<span class="sep">/</span>PALANCA 3 · DUELO BOT GARANTIZADO</div>
+      <h2>Nadie aprende un juego<br><span class="x">perdiendo el tutorial.</span></h2>
+    </div>
+    <div class="row">
+      <div class="step scale-in" data-step="0">
+        <div class="phone-frame">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="victory-screen">
+              <div class="v-tag">★ VICTORIA ★</div>
+              <div class="trophy-big">🏆</div>
+              <div class="v-title">¡Subiste a Bronce!</div>
+              <div class="v-rank"><span class="from">SIN RANGO</span> → <span class="to">⚪ BRONCE</span></div>
+              <div class="v-xp">⚡ +150 XP · Habilidad desbloqueada</div>
+              <div class="v-message">Tu rival se quedó en el camino.<br>Seguí entrenando para subir a Plata.</div>
+              <div class="v-cta">VER MI AVATAR →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" data-step="1">
+        <div class="timeline">
+          <div class="tl-row">
+            <div class="tl-time">0:00</div>
+            <div class="tl-text">Se registra. Elige <strong>Explorador</strong>.</div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-time">0:30</div>
+            <div class="tl-text">"Calibrá tu avatar". <strong>Sin opciones.</strong></div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-time">5:30</div>
+            <div class="tl-text">Termina. <strong>+50 XP</strong>. Habilidad desbloqueada.</div>
+          </div>
+        </div>
+      </div>
+      <div class="step" data-step="1">
+        <div class="timeline">
+          <div class="tl-row">
+            <div class="tl-time">6:00</div>
+            <div class="tl-text">Auto-transición al duelo. Bot débil. <strong>Sin menú.</strong></div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-time">9:00</div>
+            <div class="tl-text gold">🏆 <strong style="color: var(--ink);">Subiste a Bronce.</strong> Loot. Dopamina. Aha! Moment completo.</div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--neon);letter-spacing:0.15em;margin-top:14px;">
+          DATO PROPIO: EL 41% QUE HACE SU PRIMER DUELO VUELVE A ENTRENAR.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S21 — ECUACIÓN ========== -->
+  <section class="slide" id="s21" data-animated="false" data-steps="6">
+    <div class="step shown" data-step="0">
+      <div class="label">▸ LA MATEMÁTICA</div>
+      <h2>Tres palancas multiplicándose.</h2>
+    </div>
+    <div class="equation-row">
+      <div class="eq-piece step" data-step="1">85%</div>
+      <div class="eq-op step" data-step="2">×</div>
+      <div class="eq-piece step" data-step="2">90%</div>
+      <div class="eq-op step" data-step="3">×</div>
+      <div class="eq-piece step" data-step="3">92%</div>
+      <div class="eq-op step" data-step="4">=</div>
+      <div class="eq-result step" data-step="4">70,3%</div>
+    </div>
+    <div class="step" data-step="5">
+      <div class="eq-result-label">▸ ACTIVACIÓN OBJETIVO</div>
+      <div class="eq-context" style="margin-top: 16px;">
+        Hoy: <strong>45%</strong>. Después: <strong style="color: var(--neon);">70%</strong>.<br>
+        Eso es un <strong>+34%</strong> más de usuarios al final del funnel — sin gastar un euro extra en adquisición.
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S22 — RETENCIÓN: DIAGNÓSTICO + DATO CLAVE + PALANCAS (FUSIÓN) ========== -->
+  <section class="slide" id="s22" data-steps="5" style="padding: 44px 64px;">
+    <div style="display:flex;flex-direction:column;gap:20px;width:100%;align-items:center;">
+
+      <div class="step" data-step="0" style="text-align:center;width:100%;">
+        <div class="eyebrow">RETENCIÓN<span class="sep">/</span>OPORTUNIDAD: COSTO EMOCIONAL DE ABANDONO</div>
+        <h2 style="font-size:clamp(28px,3.2vw,48px);max-width:1100px;">El 64% se va en una semana. <span style="color:var(--gold);">Porque irse no duele.</span></h2>
+      </div>
+
+      <div class="step" data-step="0" style="width:100%;max-width:1100px;">
+        <div style="display:flex;gap:20px;align-items:stretch;justify-content:center;">
+          <div style="flex:1;padding:24px;border:1px solid var(--line);background:var(--bg-2);border-radius:6px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.15em;color:var(--muted);">93% · SOLO ENTRENA</div>
+            <div style="font-family:var(--display);font-weight:800;font-size:64px;color:var(--ink);line-height:0.95;letter-spacing:-0.04em;">13%</div>
+            <div style="font-family:var(--display);font-size:13px;color:var(--muted);">retención D90</div>
+          </div>
+          <div style="align-self:center;text-align:center;padding:0 8px;">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);">brecha</div>
+            <div style="font-family:var(--display);font-weight:800;font-size:28px;color:var(--gold);">+27pp</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);">EFECTO IKEA</div>
+          </div>
+          <div style="flex:1;padding:24px;border:1px solid rgba(184,255,58,0.3);background:linear-gradient(180deg,rgba(184,255,58,0.04),var(--bg-2));border-radius:6px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.15em;color:var(--neon);">3% · COMPRA EN TIENDA</div>
+            <div style="font-family:var(--display);font-weight:800;font-size:64px;color:var(--neon);line-height:0.95;letter-spacing:-0.04em;">40%</div>
+            <div style="font-family:var(--display);font-size:13px;color:var(--muted);">retención D90</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insight -->
+      <div class="step" data-step="0" style="text-align:center;max-width:1000px;">
+        <div style="font-family:var(--serif);font-style:italic;font-size:20px;color:var(--muted);line-height:1.4;border-left:3px solid var(--gold);padding-left:20px;text-align:left;">
+          El gasto no es consecuencia de la retención. <span style="color:var(--gold);font-weight:600;">Es su catalizador.</span>
+        </div>
+      </div>
+
+      <!-- 3 palancas -->
+      <div class="step" data-step="1" style="width:100%;max-width:1200px;">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.25em;color:var(--neon);margin-bottom:10px;text-align:center;">▸ CÓMO HACEMOS QUE IRSE DUELA</div>
+        <div style="display:flex;gap:14px;">
+          <div style="flex:1;padding:16px;border:1px solid var(--line);background:var(--bg-2);border-radius:8px;text-align:center;">
+            <div style="font-size:28px;">💔</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--neon);letter-spacing:0.1em;margin-top:4px;">RACHAS</div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--muted);margin-top:4px;">Avatar que deteriora si no entrenás</div>
+          </div>
+          <div style="flex:1;padding:16px;border:1px solid var(--line);background:var(--bg-2);border-radius:8px;text-align:center;">
+            <div style="font-size:28px;">🛍️</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--neon);letter-spacing:0.1em;margin-top:4px;">TIENDA EN PICO EMOCIONAL</div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--muted);margin-top:4px;">Oferta justo después del duelo</div>
+          </div>
+          <div style="flex:1;padding:16px;border:1px solid var(--line);background:var(--bg-2);border-radius:8px;text-align:center;">
+            <div style="font-size:28px;">🏆</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--neon);letter-spacing:0.1em;margin-top:4px;">SISTEMA DE RANGOS</div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--muted);margin-top:4px;">Estatus construido que duele perder</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" data-step="1" style="text-align:center;">
+        <div style="font-family:var(--serif);font-style:italic;font-size:16px;color:var(--muted);">
+          Cada una ataca un mecanismo psicológico distinto. Vamos una por una.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========== S25 — AVATAR + NOTIFICACIONES (fusión S25+S26) ========== -->
+  <section class="slide" id="s25" data-steps="4" style="padding: 44px 70px;">
+    <div style="display:flex;flex-direction:column;gap:16px;width:100%;align-items:center;">
+
+      <div class="step" data-step="0" style="text-align:center;width:100%;">
+        <div class="eyebrow" style="margin-bottom:8px;">RETENCIÓN · PALANCA 1<span class="sep">/</span>RACHAS</div>
+        <h2 style="font-size:clamp(26px,3vw,46px);">Si no entrenás, tu avatar se deteriora — <span class="x">y eso duele.</span></h2>
+      </div>
+
+      <!-- Avatar states row -->
+      <div class="row step" data-step="0" style="gap:16px;">
+        <div class="avatar-state day0">
+          <div class="av-img">
+            <svg viewBox="0 0 100 100" width="80" height="80">
+              <circle cx="50" cy="38" r="14" fill="#f4f4f6" stroke="#b8ff3a" stroke-width="2"/>
+              <path d="M 30 75 Q 50 55 70 75 L 70 90 L 30 90 Z" fill="#b8ff3a"/>
+              <rect x="36" y="55" width="28" height="6" rx="2" fill="#ffc857"/>
+            </svg>
+          </div>
+          <div class="av-day">DÍA 0 · ENTRENANDO</div>
+          <div class="av-name">★ Plata · Racha 7</div>
+          <div class="av-stats">XP 1.350 · TOP 30%</div>
+        </div>
+        <div class="arrow-flow">→</div>
+        <div class="avatar-state">
+          <div class="av-img dim">
+            <svg viewBox="0 0 100 100" width="80" height="80">
+              <circle cx="50" cy="38" r="14" fill="#f4f4f6" stroke="#666" stroke-width="2" opacity="0.7"/>
+              <path d="M 30 75 Q 50 55 70 75 L 70 90 L 30 90 Z" fill="#666" opacity="0.6"/>
+              <rect x="36" y="55" width="28" height="6" rx="2" fill="#888"/>
+            </svg>
+          </div>
+          <div class="av-day">DÍA 7 · INACTIVO</div>
+          <div class="av-name">⚠ Racha en riesgo</div>
+          <div class="av-stats">Armadura oxidándose</div>
+        </div>
+        <div class="arrow-flow">→</div>
+        <div class="avatar-state day14">
+          <div class="av-img broken">
+            <svg viewBox="0 0 100 100" width="80" height="80">
+              <circle cx="50" cy="38" r="14" fill="#444" stroke="#3a1e2a" stroke-width="2"/>
+              <path d="M 30 75 Q 50 55 70 75 L 70 90 L 30 90 Z" fill="#3a1e2a"/>
+              <rect x="36" y="55" width="28" height="6" rx="2" fill="#666"/>
+            </svg>
+          </div>
+          <div class="av-day">DÍA 14 · ROTO</div>
+          <div class="av-name">▼ Bajaste a Bronce</div>
+          <div class="av-stats">XP 950 <span class="red">(−400)</span></div>
+        </div>
+      </div>
+
+      <!-- Notificaciones - step separado -->
+      <div class="step" data-step="1" style="display:flex;gap:20px;align-items:center;justify-content:center;width:100%;max-width:1100px;">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.18em;color:var(--muted);writing-mode:vertical-lr;transform:rotate(180deg);flex-shrink:0;">Y LAS NOTIFICACIONES CAMBIAN</div>
+        <div class="nb boring" style="width:auto;flex:1;max-width:380px;">
+          <div class="app-ic">⚔</div>
+          <div>
+            <div class="app-name">HEEAL · 18:00</div>
+            <div class="nt-title" style="font-size:13px;">Hora de entrenar</div>
+            <div class="nt-body" style="font-size:12px;">Recordá completar tu sesión de hoy.</div>
+          </div>
+        </div>
+        <div style="font-family:var(--display);font-weight:800;font-size:18px;color:var(--magenta);">VS</div>
+        <div class="nb good" style="width:auto;flex:1;max-width:380px;">
+          <div class="app-ic">⚔</div>
+          <div>
+            <div class="app-name">HEEAL · 18:00</div>
+            <div class="nt-title" style="font-size:13px;">⚠️ Tu rival te está alcanzando</div>
+            <div class="nt-body" style="font-size:12px;">Tu racha de <span class="x">7 semanas está en riesgo.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Principio -->
+      <div class="principle-card step" data-step="1" style="max-width:100%;">
+        <div class="label">▸ AVERSIÓN A LA PÉRDIDA · KAHNEMAN & TVERSKY</div>
+        <div class="body">
+          Las pérdidas duelen <strong>2× más</strong> que ganancias equivalentes.
+          No es un número que baja — es el <strong>personaje que construiste</strong> deteriorándose.
+          Y la notificación que lo dice en voz de tu <strong>rival</strong>, no de la app.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- S26 eliminada — notificaciones integradas en S25 -->
+
+  <!-- ========== S27 — TIENDA POST VICTORIA ========== -->
+  <!-- S27 movida después del experimento Post-Victoria (s35) y reframeada como roadmap -->
+
+  <!-- ========== S28 — RANGOS Y LIGAS (la palanca que faltaba) ========== -->
+  <section class="slide" id="s28" data-animated="false" data-steps="5">
+    <div class="step shown" data-step="0">
+      <div class="eyebrow gold">RETENCIÓN · PALANCA 3<span class="sep">/</span>SISTEMA DE RANGOS</div>
+      <h2>El estatus que <span class="x">construiste</span><br>es lo que más cuesta perder.</h2>
+    </div>
+    <div class="ladder">
+      <div class="rank rank-bronze step" data-step="1">
+        <div class="rank-icon">⚪</div>
+        <div class="rank-name">Bronce</div>
+        <div class="rank-xp">0 — 500 XP</div>
+        <div class="rank-perk">Acceso a duelos básicos</div>
+      </div>
+      <div class="rank rank-silver current step" data-step="1">
+        <div class="rank-icon">⚫</div>
+        <div class="rank-name">Plata</div>
+        <div class="rank-xp">500 — 2.000 XP</div>
+        <div class="rank-perk">Skins de Plata desbloqueables</div>
+      </div>
+      <div class="rank rank-gold step" data-step="2">
+        <div class="rank-icon">🥇</div>
+        <div class="rank-name">Oro</div>
+        <div class="rank-xp">2.000 — 5.000 XP</div>
+        <div class="rank-perk">Liga competitiva · skin oro</div>
+      </div>
+      <div class="rank rank-plat step" data-step="3">
+        <div class="rank-icon">💎</div>
+        <div class="rank-name">Platino</div>
+        <div class="rank-xp">5.000 — 12.000 XP</div>
+        <div class="rank-perk">Top 10% · entras a clanes</div>
+      </div>
+      <div class="rank rank-leg step" data-step="3">
+        <div class="rank-icon">👑</div>
+        <div class="rank-name">Leyenda</div>
+        <div class="rank-xp">12.000+ XP</div>
+        <div class="rank-perk">Top 1% · aura permanente</div>
+      </div>
+    </div>
+    <div class="step" data-step="4">
+      <div class="clan-strip">
+        <div class="ic">⚔️</div>
+        <div class="text">
+          <strong>Temporadas de 4-6 semanas con clanes</strong> y narrativa colectiva.<br>
+          <span class="x">"TEMPORADA 1: La Invasión del Clan Oscuro".</span> Siempre hay algo en juego, siempre hay algo que defender.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S29 eliminada — anti-churn integrado en slide de retención condensada -->
+  <!-- S30 eliminada — impacto movido a slide final -->
+
+  <!-- ========== S31 — CHURN INTRO ========== -->
+  <!-- S31 eliminada — intro integrada en S32 -->
+
+  <!-- ========== S32 — CHURN: DIAGNÓSTICO EJECUTIVO ========== -->
+  <section class="slide" id="s32" data-animated="false" data-steps="3" style="padding:44px 64px;">
+    <div style="display:flex;flex-direction:column;gap:20px;width:100%;align-items:center;">
+
+      <div class="step" data-step="0" style="text-align:center;max-width:1100px;">
+        <div class="eyebrow" style="margin-bottom:10px;">CHURN<span class="sep">/</span>DIAGNÓSTICO</div>
+        <h2 style="font-size:clamp(28px,3.2vw,48px);">Heeal pierde <span class="x">715 usuarios</span> al mes.</h2>
+        <div style="font-family:var(--display);font-size:clamp(16px,1.6vw,22px);color:var(--muted);margin-top:8px;">
+          13% de la base. ~3.500€ MRR que se evapora. Si escalamos a 15.000 clientes sin corregirlo, serían 1.950 bajas/mes.
+        </div>
+      </div>
+
+      <!-- Breakdown visual -->
+      <div class="step" data-step="1" style="width:100%;max-width:1300px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <div style="padding:16px;border:1px solid var(--line);background:var(--bg-2);border-radius:6px;">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--dim);">41% · "OTRO"</div>
+            <div style="font-family:var(--display);font-weight:700;font-size:16px;color:var(--ink);margin-top:6px;">Indiferencia</div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;">Nunca vivieron el Aha! Moment. Murieron en la semana 1 sin haber hecho un duelo.</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--neon-2);margin-top:8px;">→ ATACA ONBOARDING</div>
+          </div>
+          <div style="padding:16px;border:1px solid rgba(255,200,87,0.3);background:var(--bg-2);border-radius:6px;">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--gold);">24% · "FREE ME ALCANZA"</div>
+            <div style="font-family:var(--display);font-weight:700;font-size:16px;color:var(--ink);margin-top:6px;">Premium en frío</div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;">No rechazan Heeal. Rechazan la propuesta de pago. La oferta aparece donde nadie decide.</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--magenta);margin-top:8px;">→ OFERTA POST-VICTORIA</div>
+          </div>
+          <div style="padding:16px;border:1px solid rgba(255,77,210,0.3);background:var(--bg-2);border-radius:6px;">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--magenta);">17% · "YA NO LO USO"</div>
+            <div style="font-family:var(--display);font-weight:700;font-size:16px;color:var(--ink);margin-top:6px;">Hábito sin anclaje</div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;">Pagaron, estuvieron activos, dejaron de abrir la app. Irse no les costó nada emocional.</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--gold);margin-top:8px;">→ RACHAS + CONGELAR</div>
+          </div>
+          <div style="padding:16px;border:1px solid var(--line);background:var(--bg-2);border-radius:6px;">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--neon);">10% · TARJETA CADUCADA</div>
+            <div style="font-family:var(--display);font-weight:700;font-size:16px;color:var(--ink);margin-top:6px;">Quick win</div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;">No decidieron irse. El cobro falló y nadie les avisó. Dunning automatizado los recupera.</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--neon);margin-top:8px;">→ ESTA SEMANA · −1 a 2pp</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Target -->
+      <div class="step" data-step="2" style="text-align:center;max-width:1100px;">
+        <div style="display:flex;gap:24px;align-items:center;justify-content:center;">
+          <div style="font-family:var(--display);font-weight:800;font-size:36px;color:var(--dim);text-decoration:line-through;">13%</div>
+          <div style="font-family:var(--mono);font-size:18px;color:var(--dim);">→</div>
+          <div style="font-family:var(--display);font-weight:800;font-size:36px;color:var(--neon);">5-8%</div>
+          <div style="font-family:var(--display);font-size:16px;color:var(--muted);margin-left:12px;">Cada razón tiene su palanca. Ninguna se resuelve con la misma herramienta.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- S33 eliminada — hook integrado en S32 -->
+
+  <!-- ========== S33B — PREMIUM EXPANDIDO ========== -->
+  <section class="slide" id="s33b" data-animated="false" data-steps="8">
+    <div class="step shown" data-step="0">
+      <div class="eyebrow magenta">MONETIZACIÓN<span class="sep">/</span>OPORTUNIDAD: PREMIUM EN EL MOMENTO CORRECTO</div>
+      <h2>Premium no es <span style="color: var(--red); text-decoration: line-through;">"más datos"</span>.<br>Es <span class="x">"mejor desempeño y estatus".</span></h2>
+      <div class="subtitle">Antes del experimento, reestructuramos qué entrega Premium. Seis ventajas competitivas claras — no features genéricas.</div>
+    </div>
+
+    <div class="benefits">
+      <div class="benefit-card step" data-step="1">
+        <div class="b-ic">⚡</div>
+        <div class="b-name">Multiplicador XP x2</div>
+        <div class="b-desc">Subí de Plata a Oro en la mitad de tiempo. Tu progreso se acelera mientras tus rivales avanzan al ritmo normal.</div>
+        <div class="b-tag">VELOCIDAD</div>
+      </div>
+      <div class="benefit-card step" data-step="2">
+        <div class="b-ic">👑</div>
+        <div class="b-name">Skins exclusivas VIP</div>
+        <div class="b-desc">Acceso a la colección Leyenda. Auras permanentes. Solo visibles para Premium — todos las ven, nadie más las tiene.</div>
+        <div class="b-tag">ESTATUS</div>
+      </div>
+      <div class="benefit-card step" data-step="3">
+        <div class="b-ic">🏰</div>
+        <div class="b-name">Ligas privadas de clan</div>
+        <div class="b-desc">Competí solo con miembros Premium en tu clan. Rankings semanales. Entrás al círculo cerrado del Top 10%.</div>
+        <div class="b-tag">COMUNIDAD</div>
+      </div>
+      <div class="benefit-card step" data-step="4">
+        <div class="b-ic">🎟️</div>
+        <div class="b-name">Eventos presenciales</div>
+        <div class="b-desc">Acceso gratuito a torneos Heeal IRL en tu ciudad. Conocé al resto de tu clan en persona. La gamificación que sale del teléfono.</div>
+        <div class="b-tag">PERTENENCIA</div>
+      </div>
+      <div class="benefit-card step" data-step="5">
+        <div class="b-ic">🤖</div>
+        <div class="b-name">Rutinas personalizadas IA</div>
+        <div class="b-desc">Plan adaptativo según tus métricas reales: progresión, descanso, peso. La IA ajusta el plan cada semana automáticamente.</div>
+        <div class="b-tag">VALOR TANGIBLE</div>
+      </div>
+      <div class="benefit-card step" data-step="6">
+        <div class="b-ic">💪</div>
+        <div class="b-name">Gym Partners 15% off</div>
+        <div class="b-desc">Descuento en cadenas partner. Tu suscripción Premium se paga sola si entrenás dos veces al mes en gimnasio.</div>
+        <div class="b-tag">VALOR TANGIBLE</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="7">
+      <div class="price-strip">
+        <span class="label">▸ TODO POR</span>
+        <span class="price">4,90€</span>
+        <span class="small">/ mes · cancela cuando quieras</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S34 — Hipótesis ========== -->
+  <!-- S34 eliminada — contenido integrado en S35 -->
+
+  <!-- ========== S35 — EXPERIMENTO: HIPÓTESIS + DISEÑO ========== -->
+  <section class="slide" id="s35" data-animated="false" data-steps="3" style="padding:44px 56px;">
+    <div style="display:flex;flex-direction:column;gap:16px;width:100%;align-items:center;">
+
+      <div class="step" data-step="0" style="text-align:center;">
+        <div class="eyebrow magenta" style="margin-bottom:8px;">EXPERIMENTO<span class="sep">/</span>OFERTA POST-VICTORIA</div>
+        <h2 style="font-size:clamp(24px,2.8vw,42px);">Mostrémosla en el <span class="x">único momento</span> donde tiene fuerza real.</h2>
+      </div>
+
+      <div style="display:flex;gap:32px;align-items:stretch;width:100%;max-width:1400px;">
+
+        <!-- Hipótesis izquierda -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:0;" class="step" data-step="1">
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:13px;">
+            <div style="padding:10px 14px;background:rgba(255,77,210,0.08);font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--magenta);border-bottom:1px solid var(--line);display:flex;align-items:center;">BY DOING</div>
+            <div style="padding:10px 14px;border-bottom:1px solid var(--line);font-family:var(--display);font-size:13px;color:var(--ink);line-height:1.4;">Pantalla de Oferta de Victoria al ganar el <strong>primer duelo</strong>, integrada en la celebración.</div>
+            <div style="padding:10px 14px;background:rgba(255,77,210,0.08);font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--magenta);border-bottom:1px solid var(--line);display:flex;align-items:center;">ON</div>
+            <div style="padding:10px 14px;border-bottom:1px solid var(--line);font-family:var(--display);font-size:13px;color:var(--ink);line-height:1.4;">Techie Motivado Mobile Free que acaba de ganar su primer duelo.</div>
+            <div style="padding:10px 14px;background:rgba(255,77,210,0.08);font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--magenta);border-bottom:1px solid var(--line);display:flex;align-items:center;">WE EXPECT</div>
+            <div style="padding:10px 14px;border-bottom:1px solid var(--line);font-family:var(--display);font-size:13px;color:var(--ink);line-height:1.4;">Conversión Free→Premium del <strong>4,2% al 9,5%</strong> en 7 días post-duelo.</div>
+            <div style="padding:10px 14px;background:rgba(255,77,210,0.08);font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--magenta);display:flex;align-items:center;">BECAUSE</div>
+            <div style="padding:10px 14px;font-family:var(--display);font-size:13px;color:var(--ink);line-height:1.4;"><strong>Peak-End Rule</strong> (Kahneman): decisiones en el pico emocional, no en el promedio. Victoria = pico.</div>
+          </div>
+          <div style="margin-top:12px;padding:10px 14px;border:1px solid var(--line);background:var(--bg-2);border-radius:6px;">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--muted);margin-bottom:4px;">CONFIGURACIÓN</div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--ink);line-height:1.5;">50/50 split · Trigger: <strong>first_duel = true AND win</strong> · 3 semanas mínimo · p &lt; 0,05 · Parada si conv &lt; 2% en 7 días</div>
+          </div>
+        </div>
+
+        <!-- Mockups derecha -->
+        <div style="display:flex;gap:16px;align-items:center;" class="step" data-step="2">
+          <div class="variant-wrap control">
+            <div class="vtag">▼ CONTROL</div>
+            <div class="phone-frame" style="width:220px;height:460px;border-radius:26px;">
+              <div class="notch" style="width:60px;height:14px;"></div>
+              <div class="screen">
+                <div class="control-screen" style="height:100%;padding:28px 12px 12px;">
+                  <div class="v-tag-mini" style="font-size:8px;">★ VICTORIA ★</div>
+                  <div class="trophy-mid" style="font-size:40px;margin:4px 0;">🏆</div>
+                  <div class="vt-mini" style="font-size:14px;">¡Ganaste!</div>
+                  <div class="vt-sub" style="font-size:8px;margin:2px 0 8px;">+150 XP · Habilidad nueva</div>
+                  <div style="font-family:var(--display);font-size:10px;color:var(--dim);text-align:center;padding:0 8px;margin-top:auto;">Premium sigue en Ajustes.</div>
+                  <div class="cta-cont" style="font-size:10px;padding:8px 0;margin-top:8px;">CONTINUAR</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-family:var(--display);font-weight:800;font-size:24px;color:var(--magenta);">VS</div>
+
+          <div class="variant-wrap test">
+            <div class="vtag">▲ VARIANTE 01</div>
+            <div class="phone-frame" style="width:220px;height:460px;border-radius:26px;">
+              <div class="notch" style="width:60px;height:14px;"></div>
+              <div class="screen">
+                <div class="test-screen" style="height:100%;padding:28px 12px 12px;">
+                  <div class="v-tag-mini" style="font-size:8px;">★ VICTORIA ★</div>
+                  <div class="trophy-mid" style="font-size:40px;margin:4px 0;">🏆</div>
+                  <div class="vt-mini" style="font-size:14px;">¡Subiste a Plata!</div>
+                  <div class="vt-sub" style="font-size:8px;margin:2px 0 6px;">Tu rival ve tu avatar en combate.</div>
+                  <div class="premium-tag" style="font-size:8px;padding:3px 0;">⚡ ACTIVA PREMIUM</div>
+                  <div class="premium-title" style="font-size:12px;margin-top:6px;">Duplica tu XP esta semana</div>
+                  <div class="premium-sub" style="font-size:9px;margin:2px 0 8px;"><span class="price">4,90€/mes</span></div>
+                  <div class="cta-pay" style="font-size:10px;padding:8px 0;"> Pagar con Apple Pay</div>
+                  <div class="skip-btn" style="font-size:9px;margin-top:6px;">Seguir sin Premium</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RESULTADOS DEL EXPERIMENTO (was s36) -->
+      <div class="step" data-step="3" style="width:100%;max-width:1400px;">
+        <div style="display:flex;gap:20px;align-items:center;justify-content:center;">
+          <div style="text-align:center;">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.3em;color:var(--magenta);">▸ RESULTADO · 3 SEMANAS · p &lt; 0,05</div>
+            <div style="font-family:var(--display);font-weight:800;font-size:clamp(48px,6vw,80px);color:var(--magenta);line-height:0.9;letter-spacing:-0.04em;">+80,9%</div>
+            <div style="font-family:var(--display);font-weight:700;font-size:16px;color:var(--neon);margin-top:4px;">✓ en conversión Free → Premium</div>
+          </div>
+          <div style="display:flex;gap:12px;">
+            <div style="padding:12px 16px;border:1px solid var(--line);background:var(--bg-2);border-radius:6px;text-align:center;">
+              <div style="font-family:var(--mono);font-size:8px;color:var(--muted);">CONTROL</div>
+              <div style="font-family:var(--display);font-weight:800;font-size:24px;color:var(--dim);">4,2%</div>
+            </div>
+            <div style="padding:12px 16px;border:1px solid var(--magenta);background:rgba(255,77,210,0.06);border-radius:6px;text-align:center;">
+              <div style="font-family:var(--mono);font-size:8px;color:var(--magenta);">VARIANTE</div>
+              <div style="font-family:var(--display);font-weight:800;font-size:24px;color:var(--magenta);">7,6%</div>
+            </div>
+            <div style="padding:12px 16px;border:1px solid var(--neon);background:rgba(184,255,58,0.06);border-radius:6px;text-align:center;">
+              <div style="font-family:var(--mono);font-size:8px;color:var(--neon);">CTR</div>
+              <div style="font-family:var(--display);font-weight:800;font-size:24px;color:var(--neon);">31%</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:var(--display);font-size:14px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.4;">
+          Conv. orgánica de ajustes <strong style="color:var(--neon);">no cayó</strong>. Demanda incremental. Apple Pay: 68%. <strong>Payback: &lt;2 meses</strong>. Delta ARR: <strong style="color:var(--magenta);">+6.408€/año</strong>.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- S36 eliminada — resultados integrados en S35 -->
+
+  <!-- ========== S35b — SIGUIENTE EXPERIMENTO (roadmap, no ejecutado) ========== -->
+  <section class="slide" id="s35b" data-animated="false" data-steps="3" style="padding:44px 56px;">
+    <div style="display:flex;flex-direction:column;gap:20px;width:100%;align-items:center;">
+
+      <div class="step" data-step="0" style="text-align:center;">
+        <div class="eyebrow magenta" style="margin-bottom:8px;">▸ ROADMAP / SIGUIENTE EXPERIMENTO<span class="sep">·</span><span style="color:var(--gold);">NO EJECUTADO</span></div>
+        <h2 style="font-size:clamp(24px,2.8vw,42px);">Si Premium funcionó en el pico, <span class="x">¿qué más cabe ahí?</span></h2>
+      </div>
+
+      <div style="display:flex;gap:36px;align-items:center;width:100%;max-width:1400px;justify-content:center;">
+
+        <!-- Hipótesis izquierda -->
+        <div style="flex:1;max-width:640px;display:flex;flex-direction:column;gap:0;" class="step" data-step="1">
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:0;border:1px dashed var(--gold);border-radius:8px;overflow:hidden;font-size:13px;background:rgba(255,200,77,0.02);">
+            <div style="padding:10px 14px;background:rgba(255,200,77,0.10);font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--gold);border-bottom:1px solid var(--line);display:flex;align-items:center;">BY DOING</div>
+            <div style="padding:10px 14px;border-bottom:1px solid var(--line);font-family:var(--display);font-size:13px;color:var(--ink);line-height:1.4;">Ofrecer objetos de tienda (skins) en la pantalla de victoria del <strong>primer duelo</strong>.</div>
+            <div style="padding:10px 14px;background:rgba(255,200,77,0.10);font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--gold);border-bottom:1px solid var(--line);display:flex;align-items:center;">ON</div>
+            <div style="padding:10px 14px;border-bottom:1px solid var(--line);font-family:var(--display);font-size:13px;color:var(--ink);line-height:1.4;">Techie Motivado Mobile Free que acaba de ganar su primer duelo.</div>
+            <div style="padding:10px 14px;background:rgba(255,200,77,0.10);font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--gold);border-bottom:1px solid var(--line);display:flex;align-items:center;">WE EXPECT</div>
+            <div style="padding:10px 14px;border-bottom:1px solid var(--line);font-family:var(--display);font-size:13px;color:var(--ink);line-height:1.4;">Pasar de <strong>3% al 8-10%</strong> de conversión a compra. Efecto IKEA en cadena sobre retención.</div>
+            <div style="padding:10px 14px;background:rgba(255,200,77,0.10);font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--gold);display:flex;align-items:center;">BECAUSE</div>
+            <div style="padding:10px 14px;font-family:var(--display);font-size:13px;color:var(--ink);line-height:1.4;"><strong>Peak-End Rule</strong> (Kahneman). Hoy la tienda vive en menú frío. La movemos al pico emocional.</div>
+          </div>
+          <div style="margin-top:12px;padding:10px 14px;border:1px dashed var(--gold);background:rgba(255,200,77,0.03);border-radius:6px;">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--gold);margin-bottom:4px;">CONFIGURACIÓN <span style="color:var(--muted);">· POR DEFINIR EN DETALLE</span></div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--ink);line-height:1.5;">50/50 split · Trigger: <strong>first_duel = win</strong> · Diseño y guardrails se cierran al ver resultados completos del Experimento 01</div>
+          </div>
+
+          <!-- Status & Impact: debajo de la hipótesis, en línea -->
+          <div style="display:flex;gap:12px;margin-top:14px;">
+            <div style="flex:1;padding:12px 14px;border:1px dashed var(--gold);background:rgba(255,200,77,0.04);border-radius:6px;text-align:center;">
+              <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.2em;color:var(--gold);">▸ STATUS</div>
+              <div style="font-family:var(--display);font-weight:800;font-size:14px;color:var(--gold);margin-top:4px;line-height:1.2;">PENDIENTE DE EJECUCIÓN</div>
+              <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:4px;letter-spacing:0.1em;">SE LANZA POST-CIERRE DEL EXP. 01</div>
+            </div>
+            <div style="flex:1;padding:12px 14px;border:1px solid var(--line);background:var(--bg-2);border-radius:6px;text-align:center;">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.1em;">IMPACTO ESTIMADO</div>
+              <div style="font-family:var(--display);font-weight:800;font-size:18px;color:var(--neon);margin-top:2px;line-height:1.1;">+8 a 12 pts</div>
+              <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:2px;">retención D90 · ICE 336</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mockup derecha: tamaño completo, sin overrides -->
+        <div class="step" data-step="2" style="display:flex;align-items:center;">
+          <div class="phone-frame">
+            <div class="notch"></div>
+            <div class="screen">
+              <div class="shop-screen">
+                <div class="shop-tag">★ POST-VICTORIA · TIENDA</div>
+                <div class="shop-title">Premiate por tu Win</div>
+                <div class="shop-sub">Skins exclusivas — solo hoy</div>
+                <div class="shop-grid">
+                  <div class="shop-item featured">
+                    <span class="badge-new">NEW</span>
+                    <div class="item-ic">🛡️</div>
+                    <div class="item-name">ARMADURA<br>PLATA</div>
+                    <div class="item-price">2,90€</div>
+                  </div>
+                  <div class="shop-item">
+                    <div class="item-ic">⚔️</div>
+                    <div class="item-name">ESPADA<br>FUEGO</div>
+                    <div class="item-price">2,90€</div>
+                  </div>
+                  <div class="shop-item">
+                    <div class="item-ic">👑</div>
+                    <div class="item-name">CORONA<br>VICTORIA</div>
+                    <div class="item-price">0,90€</div>
+                  </div>
+                  <div class="shop-item">
+                    <div class="item-ic">🔥</div>
+                    <div class="item-name">AURA<br>ÉPICA</div>
+                    <div class="item-price">0,90€</div>
+                  </div>
+                </div>
+                <div class="shop-cta">EQUIPAR Y SEGUIR →</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========== IMPACTO COMBINADO ========== -->
+  <section class="slide" id="s_impact" data-animated="false" data-steps="5" style="padding: 48px 64px;">
+    <div style="display:flex;flex-direction:column;gap:20px;width:100%;align-items:center;">
+
+      <div class="step" data-step="0" style="text-align:center;">
+        <div class="eyebrow" style="margin-bottom:8px;">▸ IMPACTO PROYECTADO · 2026</div>
+        <h2 style="font-size:clamp(28px,3.2vw,48px);">Todo junto. <span style="color:var(--neon);">El efecto multiplicador.</span></h2>
+      </div>
+
+      <div class="step" data-step="1" style="width:100%;max-width:1200px;">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
+          <div style="padding:20px 16px;border:1px solid rgba(0,229,255,0.3);background:linear-gradient(180deg,rgba(0,229,255,0.06),var(--bg-2));border-radius:8px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--neon-2);">ACTIVACIÓN</div>
+            <div style="font-family:var(--display);font-size:16px;color:var(--dim);text-decoration:line-through;margin-top:6px;">45%</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--dim);">→</div>
+            <div style="font-family:var(--display);font-weight:800;font-size:32px;color:var(--neon);letter-spacing:-0.02em;">70%</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px;">×1,34</div>
+          </div>
+          <div style="padding:20px 16px;border:1px solid rgba(255,200,87,0.3);background:linear-gradient(180deg,rgba(255,200,87,0.06),var(--bg-2));border-radius:8px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--gold);">RETENCIÓN D90</div>
+            <div style="font-family:var(--display);font-size:16px;color:var(--dim);text-decoration:line-through;margin-top:6px;">15%</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--dim);">→</div>
+            <div style="font-family:var(--display);font-weight:800;font-size:32px;color:var(--gold);letter-spacing:-0.02em;">30%</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px;">×2,0</div>
+          </div>
+          <div style="padding:20px 16px;border:1px solid rgba(255,61,110,0.3);background:linear-gradient(180deg,rgba(255,61,110,0.06),var(--bg-2));border-radius:8px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--red);">CHURN MENSUAL</div>
+            <div style="font-family:var(--display);font-size:16px;color:var(--dim);text-decoration:line-through;margin-top:6px;">13%</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--dim);">→</div>
+            <div style="font-family:var(--display);font-weight:800;font-size:32px;color:var(--neon);letter-spacing:-0.02em;">5-8%</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px;">×1,60 LTV</div>
+          </div>
+          <div style="padding:20px 16px;border:1px solid rgba(255,77,210,0.3);background:linear-gradient(180deg,rgba(255,77,210,0.06),var(--bg-2));border-radius:8px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--magenta);">CONV. PREMIUM</div>
+            <div style="font-family:var(--display);font-size:16px;color:var(--dim);text-decoration:line-through;margin-top:6px;">4,2%</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--dim);">→</div>
+            <div style="font-family:var(--display);font-weight:800;font-size:32px;color:var(--magenta);letter-spacing:-0.02em;">9,5%</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px;">×2,88</div>
+          </div>
+          <div style="padding:20px 16px;border:2px solid var(--neon);background:rgba(184,255,58,0.08);border-radius:8px;text-align:center;box-shadow:0 0 20px rgba(184,255,58,0.15);">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--neon);">ARR</div>
+            <div style="font-family:var(--display);font-size:16px;color:var(--dim);text-decoration:line-through;margin-top:6px;">100K€</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--dim);">→</div>
+            <div style="font-family:var(--display);font-weight:800;font-size:32px;color:var(--neon);letter-spacing:-0.02em;">300K€</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--neon);margin-top:4px;">×3</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" data-step="2" style="text-align:center;">
+        <div style="font-family:var(--display);font-weight:800;font-size:clamp(48px,6vw,96px);line-height:0.85;letter-spacing:-0.04em;">
+          <span style="background:linear-gradient(180deg,var(--neon),var(--neon-2));-webkit-background-clip:text;background-clip:text;color:transparent;">×4,5</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:12px;letter-spacing:0.2em;color:var(--neon);margin-top:8px;">EFECTO MULTIPLICADOR COMBINADO</div>
+      </div>
+
+      <div class="step" data-step="3" style="width:100%;max-width:1100px;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="padding:14px;border:1px solid var(--line);background:var(--bg-2);border-radius:6px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--neon-2);letter-spacing:0.1em;">ACTIVACIÓN</div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--muted);margin-top:4px;">Arquetipos · Misión 5min · Duelo bot</div>
+          </div>
+          <div style="padding:14px;border:1px solid var(--line);background:var(--bg-2);border-radius:6px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:0.1em;">RETENCIÓN</div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--muted);margin-top:4px;">Rachas · Tienda · Rangos · Anti-churn</div>
+          </div>
+          <div style="padding:14px;border:1px solid var(--line);background:var(--bg-2);border-radius:6px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--magenta);letter-spacing:0.1em;">MONETIZACIÓN</div>
+            <div style="font-family:var(--display);font-size:12px;color:var(--muted);margin-top:4px;">Oferta post-victoria (+80,9% validado)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" data-step="4" style="text-align:center;">
+        <div style="font-family:var(--serif);font-style:italic;font-size:18px;color:var(--muted);max-width:900px;line-height:1.4;">
+          El crecimiento de Heeal no depende de traer más usuarios. Depende de <span style="color:var(--ink);font-weight:600;">rediseñar el comportamiento</span> que queremos que ocurra cada semana.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========== S37 — CIERRE ========== -->
+  <section class="slide" id="s37" data-animated="false" data-steps="3">
+    <div class="step shown" data-step="0">
+      <div class="summary">
+        <span>ACTIVAR</span><span class="sep">→</span>
+        <span>RETENER</span><span class="sep">→</span>
+        <span>MONETIZAR</span>
+      </div>
+    </div>
+    <div class="step" data-step="1">
+      <div class="closing-quote">
+        Empezamos con una pregunta:<br>
+        <span style="color:var(--muted);font-size:0.7em;">¿por qué la gente sigue jugando un videojuego?</span><br>
+        <br>
+        Porque cada sesión construye algo<br>
+        que <span class="x">no se quieren permitir perder.</span>
+      </div>
+    </div>
+    <div class="step" data-step="2">
+      <div style="font-family:var(--display);font-weight:600;font-size:clamp(18px,2vw,26px);color:var(--muted);margin-top:8px;">
+        Ese es el sistema que estamos construyendo para Heeal.
+      </div>
+      <div class="signature">
+        <span>HEEAL · GROWTH STRATEGY 2026</span>
+        <span class="sep">·</span>
+        <span class="names">FRANCO · GUIDO · MATÍAS</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // ============================================================
+  // NAVIGATION ENGINE
+  // Slides with data-animated="false" show all content at once.
+  // Slides 8,9,10,12,13,14 (1-indexed) = s18,s19,s20,s22,s25,s27 keep step animations.
+  // ============================================================
+
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let current = 0;
+  let currentStep = -1;
+
+  // Build set of slide INDICES (0-based) that have step animations
+  // All others show everything at once on enter.
+  // Mark slides with data-animated="true" in HTML, or use index list:
+  function isAnimated(slideEl) {
+    return slideEl.dataset.animated !== 'false';
+  }
+
+  // Build progress bar
+  const progressBar = document.getElementById('progressBar');
+  for (let i = 0; i < total; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    progressBar.appendChild(seg);
+  }
+  const segs = progressBar.querySelectorAll('.seg');
+  const slideTotal = document.getElementById('slideTotal');
+  if (slideTotal) slideTotal.textContent = total;
+
+  function getMaxStep(slide) {
+    let max = -1;
+    slide.querySelectorAll('.step').forEach(el => {
+      const s = parseInt(el.dataset.step ?? 0, 10);
+      if (s > max) max = s;
+    });
+    return max;
+  }
+
+  function revealStep(slide, stepNum) {
+    const els = slide.querySelectorAll(`.step[data-step="${stepNum}"]`);
+    els.forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 60);
+    });
+  }
+
+  function revealAllSteps(slide) {
+    const maxStep = getMaxStep(slide);
+    for (let s = 0; s <= maxStep; s++) {
+      slide.querySelectorAll(`.step[data-step="${s}"]`).forEach(el => el.classList.add('visible'));
+    }
+  }
+
+  function hideAllSteps(slide) {
+    slide.querySelectorAll('.step').forEach(el => el.classList.remove('visible'));
+  }
+
+  function updateHUD() {
+    segs.forEach((s, i) => {
+      s.classList.remove('current', 'done');
+      if (i < current) s.classList.add('done');
+      else if (i === current) s.classList.add('current');
+    });
+    const counter = document.getElementById('slideCounter');
+    if (counter) counter.innerHTML = `<span class="cur">${current + 1}</span> / ${total}`;
+  }
+
+  function goToSlide(idx) {
+    if (idx < 0 || idx >= total) return;
+    slides[current].classList.remove('active');
+    hideAllSteps(slides[current]);
+    current = idx;
+    const slide = slides[current];
+    slide.classList.add('active');
+
+    if (isAnimated(slide)) {
+      currentStep = 0;
+      requestAnimationFrame(() => revealStep(slide, 0));
+    } else {
+      // Show all content at once
+      currentStep = getMaxStep(slide);
+      requestAnimationFrame(() => revealAllSteps(slide));
+    }
+    updateHUD();
+  }
+
+  function next() {
+    const slide = slides[current];
+    const maxStep = getMaxStep(slide);
+    if (isAnimated(slide) && currentStep < maxStep) {
+      currentStep++;
+      revealStep(slide, currentStep);
+    } else {
+      goToSlide(current + 1);
+    }
+  }
+
+  function prev() {
+    if (isAnimated(slides[current]) && currentStep > 0) {
+      const slide = slides[current];
+      slide.querySelectorAll(`.step[data-step="${currentStep}"]`).forEach(el => el.classList.remove('visible'));
+      currentStep--;
+    } else {
+      if (current > 0) {
+        slides[current].classList.remove('active');
+        hideAllSteps(slides[current]);
+        current--;
+        const prevSlide = slides[current];
+        prevSlide.classList.add('active');
+        if (isAnimated(prevSlide)) {
+          const maxStep = getMaxStep(prevSlide);
+          currentStep = maxStep;
+          for (let s = 0; s <= maxStep; s++) {
+            prevSlide.querySelectorAll(`.step[data-step="${s}"]`).forEach(el => el.classList.add('visible'));
+          }
+        } else {
+          revealAllSteps(prevSlide);
+          currentStep = getMaxStep(prevSlide);
+        }
+        updateHUD();
+      }
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { goToSlide(0); }
+    else if (e.key === 'End') { goToSlide(total - 1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('a, button, input, textarea, [contenteditable], .arch-card, .nav-help')) return;
+    const x = e.clientX; const w = window.innerWidth;
+    if (x > w / 2) next(); else prev();
+  });
+
+  // Slide 18 - archetype interactivity
+  document.querySelectorAll('#s18 .arch-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('#s18 .arch-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    });
+  });
+
+  // Initialize first slide
+  slides[0].classList.add('active');
+  goToSlide(0);
+</script>
+
+</body>
+</html>
